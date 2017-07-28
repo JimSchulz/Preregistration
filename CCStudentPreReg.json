@@ -1,0 +1,951 @@
+{
+      "type": "page",
+      "name": "CCStudentPreReg",
+      "title": "Preregistration",
+      "label": "Preregistration",
+      "components": [
+            {
+                  "name": "getUser",
+                  "type": "resource",
+                  "staticData": [],
+                  "resource": "virtualDomains.GenUser"
+            },
+            {
+                  "name": "getStudent",
+                  "type": "resource",
+                  "staticData": [],
+                  "resource": "virtualDomains.GenStuIDName"
+            },
+            {
+                  "name": "studentLookup",
+                  "type": "resource",
+                  "staticData": [],
+                  "resource": "virtualDomains.GenStuLookup"
+            },
+            {
+                  "name": "getStuCourses",
+                  "type": "resource",
+                  "staticData": [],
+                  "resource": "virtualDomains.PreRegStuCourses"
+            },
+            {
+                  "name": "getTermSelect",
+                  "type": "resource",
+                  "staticData": [],
+                  "resource": "virtualDomains.PreRegTermSelect"
+            },
+            {
+                  "name": "getSubjects",
+                  "type": "resource",
+                  "staticData": [],
+                  "resource": "virtualDomains.GenSubject"
+            },
+            {
+                  "name": "getBlocks",
+                  "type": "resource",
+                  "staticData": [],
+                  "resource": "virtualDomains.GenBlocks"
+            },
+            {
+                  "name": "getInstructors",
+                  "type": "resource",
+                  "staticData": [],
+                  "resource": "virtualDomains.GenInstructor"
+            },
+            {
+                  "name": "getDegreeRequirements",
+                  "type": "resource",
+                  "staticData": [],
+                  "resource": "virtualDomains.GenDegReq"
+            },
+            {
+                  "name": "getCampuses",
+                  "type": "resource",
+                  "staticData": [],
+                  "resource": "virtualDomains.GenCampus"
+            },
+            {
+                  "name": "getAddGrid",
+                  "type": "resource",
+                  "staticData": [],
+                  "resource": "virtualDomains.StuAddGrid"
+            },
+            {
+                  "name": "getGradingTrack",
+                  "type": "resource",
+                  "staticData": [],
+                  "resource": "virtualDomains.GenGradingTrackNoAudit"
+            },
+            {
+                  "name": "BlockHidden",
+                  "type": "block",
+                  "showInitially": false,
+                  "components": [
+                        {
+                              "name": "UserID",
+                              "type": "text",
+                              "model": "getUser.USER_ID",
+                              "parameters": {},
+                              "validation": {},
+                              "readonly": false,
+                              "required": false,
+                              "loadInitially": true,
+                              "onLoad": "// UserID - onLoad\n\nvar userType = '';\nvar auth = '';\nvar paws;\nvar today = new Date();\nvar endDate;\n\n// Initially, hide the PreRegInstructions and show the BlockPreRegInstructions\ndocument.getElementById(\"pbid-PreRegInstructions\").style.display = \"none\";\n$BlockPreRegInstructions.$visible = true;\n\n// Initially, hide the PreRegClosed Literal\ndocument.getElementById('pbid-PreRegClosed').style.display = 'none';\n\n// Get the Preregistration Term\n$PreRegType.$load({clearCache:true});\n$PreRegTerm.$load({clearCache:true});\n$PreRegEndDate.$load({clearCache:true});\n$MaxPoints.$load({clearCache:true});\n\n// We pause a moment to allow DB retrieval time to complete\nfunction waitForIt() {\n  paws = setTimeout(go, 300);\n}\n\nfunction go() {\n\n  // Debug\n  //alert(\"Type=\" + document.getElementById('pbid-PreRegType').value,{flash:true});\n  //alert(\"Term=\" + document.getElementById('pbid-PreRegTerm').value,{flash:true});\n  //alert(\"EndDate=\" + document.getElementById('pbid-PreRegEndDate').value,{flash:true});\n  //alert(\"MaxPoints=\" + document.getElementById('pbid-MaxPoints').value,{flash:true});\n\n  var term = document.getElementById('pbid-PreRegTerm').value.substring(4,6);\n  var endDate = new Date(document.getElementById('pbid-PreRegEndDate').value);\n  \n  // Values in below if statement come from GTVSDAX\n\n  if (document.getElementById('pbid-PreRegTerm').value.length == 6 &&  // PreRegTerm has 6 characters\n      !isNaN(document.getElementById('pbid-PreRegTerm').value)     &&  // PreRegTerm is numeric\n      !isNaN(document.getElementById('pbid-MaxPoints').value)      &&  // MaxPoints is numeric\n      endDate >= today &&                                              // PreRegEndDate > Current Date\n      (term == '10' || term == '20' || term == '30')) {                // The term is 10, 20 or 30\n\n    // Preregistration is Open\n\n    // Determine what kind of user is signing on (Web Tailor)\n    for (i=0; i<$$user.authorities.length; i++) {\n      auth = $$user.authorities[i].objectName;\n      //alert(auth);  // Helpful Debug - Shows user's WebTailor Roles\n      if (auth.indexOf('WTAILORADMIN') > -1) {  // was GPBADMN\n        userType = \"Dev\";\n      }\n      if (auth.indexOf('REGISTRAR') > -1) {\n        userType = \"Reg\";\n      }\n      if (auth.indexOf('STUDENT') > -1) {\n        userType = \"Stu\";\n      }\n    }\n\n    if (userType == 'Reg' || userType == 'Dev') {\n\n      // Show the student lookup block\n      $BlockStuLookup.$visible = true;\n      $BlockNull02.$visible = true;\n      document.getElementById(\"pbid-UserSource\").value = 'R';  // Registrars or Dev User\n      document.getElementById('pbid-UserButton').click();\n    }\n    else if (userType == 'Stu') {\n\n      // Hide the student lookup block\n      $BlockStuLookup.$visible = false;\n      $BlockNull02.$visible = false;\n\n      // Prep data\n      document.getElementById(\"pbid-UserSource\").value = 'S';  // Student User\n      var userSource = 'S';\n      document.getElementById('pbid-UserButton').click();\n\n      // The FirstFunction gets the user's pidm\n      function firstFunction() {\n        var deferred = $.Deferred();\n        var nextStep = function() {\n          if ($UserPIDM == null) {\n            $UserPIDM.$load();\n            setTimeout(nextStep, 100); \n          }\n          else {\n            $PassPIDM = document.getElementById('pbid-UserPIDM').value;\n            deferred.resolve(i);\n          }\n        }\n        nextStep();\n        return deferred.promise();\n      }\n\n      // The SecondFunction calls the FirstFunction\n      // We do this to make JavaScript wait for completion of the $UserPIDM.$load DB call\n        function secondFunction() {\n        var promise = firstFunction();\n        promise.then(function(result) { \n          var passPIDM = document.getElementById('pbid-UserPIDM').value;\n        });\n      }\n\n      secondFunction();\n    }\n    else {\n      document.getElementById(\"pbid-UserSource\").value = null;  // Not Allowed\n\n      // Hide the student lookup block\n      $BlockStuLookup.$visible = false;\n      $BlockNull02.$visible = false;\n\n      alert(\"You're not authorized to use the Drop/Add application.\",{type:\"error\"});\n    }\n  }\n  else {\n\n    // Preregistration is Closed\n\n    // Show the Closed message\n    document.getElementById('pbid-PreRegClosed').style.display = 'block';\n\n    // Hide Preregistration Instruction Objects\n    document.getElementById(\"pbid-PreRegButton\").style.display = \"none\";\n    document.getElementById(\"pbid-PreRegInfo\").style.display = \"none\";\n    document.getElementById(\"pbid-PreRegInstructions\").style.display = \"none\";\n\n    // Hide All Blocks\n    $BlockNull01.$visible = false;\n    $BlockStuLookup.$visible = false;\n    $BlockNull02.$visible = false;\n    $BlockAddClasses.$visible = false;\n    $BlockNull03.$visible = false;\n    $BlockStuCourses.$visible = false;\n    $BlockNull04.$visible = false;\n    $BlockClassSearch.$visible = false;\n    $BlockNull05.$visible = false;\n    $BlockCourseAdd.$visible = false;\n\n  }\n} // function go\n\nwaitForIt();"
+                        },
+                        {
+                              "name": "UserPIDM",
+                              "type": "text",
+                              "model": "getUser.USER_PIDM",
+                              "parameters": {},
+                              "validation": {},
+                              "readonly": false,
+                              "required": false,
+                              "loadInitially": true
+                        },
+                        {
+                              "name": "PassPIDM",
+                              "type": "text",
+                              "parameters": {},
+                              "validation": {},
+                              "readonly": false,
+                              "required": false,
+                              "loadInitially": false,
+                              "model": ""
+                        },
+                        {
+                              "name": "UserButton",
+                              "type": "button",
+                              "label": "User Button",
+                              "onClick": "return;"
+                        },
+                        {
+                              "name": "UserSource",
+                              "type": "text",
+                              "parameters": {},
+                              "validation": {},
+                              "readonly": false,
+                              "required": false,
+                              "loadInitially": false,
+                              "onLoad": ""
+                        },
+                        {
+                              "name": "PreRegType",
+                              "type": "text",
+                              "label": "",
+                              "model": "getPreRegInfo.PREREG_TYPE",
+                              "parameters": {},
+                              "loadInitially": false,
+                              "onLoad": "",
+                              "style": "",
+                              "validation": {},
+                              "readonly": false,
+                              "required": false
+                        },
+                        {
+                              "name": "PreRegTerm",
+                              "type": "text",
+                              "model": "getPreRegInfo.PREREG_TERM",
+                              "parameters": {},
+                              "validation": {},
+                              "readonly": false,
+                              "required": false,
+                              "loadInitially": false
+                        },
+                        {
+                              "name": "PreRegEndDate",
+                              "type": "text",
+                              "model": "getPreRegInfo.PREREG_END_DATE",
+                              "parameters": {},
+                              "validation": {},
+                              "readonly": false,
+                              "required": false,
+                              "loadInitially": true
+                        },
+                        {
+                              "name": "MaxPoints",
+                              "type": "text",
+                              "parameters": {},
+                              "validation": {},
+                              "readonly": false,
+                              "required": false,
+                              "loadInitially": false,
+                              "model": "getPreRegInfo.PREREG_MAX_POINTS",
+                              "onLoad": ""
+                        },
+                        {
+                              "name": "TotalPointsIndex",
+                              "type": "text",
+                              "parameters": {},
+                              "validation": {},
+                              "readonly": false,
+                              "required": false,
+                              "loadInitially": false
+                        }
+                  ]
+            },
+            {
+                  "name": "getPreRegInfo",
+                  "type": "resource",
+                  "staticData": [],
+                  "resource": "virtualDomains.PreRegInfo"
+            },
+            {
+                  "name": "BlockPreRegInstructions",
+                  "type": "block",
+                  "label": "",
+                  "style": "blocks",
+                  "showInitially": false,
+                  "components": [
+                        {
+                              "name": "PreRegInfoForm",
+                              "type": "form",
+                              "style": "blockInline",
+                              "nextButtonLabel": "Next",
+                              "showInitially": true,
+                              "components": [
+                                    {
+                                          "name": "PreRegButton",
+                                          "type": "button",
+                                          "label": "Preregistration Instructions",
+                                          "onClick": "// Show/Hide the Preregistration instructions\n\nif (document.getElementById(\"pbid-PreRegInstructions\").style.display == 'none') {\n  document.getElementById(\"pbid-PreRegInstructions\").style.display = \"block\";\n}\nelse {\n  document.getElementById(\"pbid-PreRegInstructions\").style.display = \"none\";\n}"
+                                    },
+                                    {
+                                          "name": "PreRegInfo",
+                                          "type": "text",
+                                          "model": "getPreRegInfo.PREREG_INFO",
+                                          "parameters": {},
+                                          "validation": {},
+                                          "readonly": false,
+                                          "required": false,
+                                          "loadInitially": true
+                                    }
+                              ]
+                        },
+                        {
+                              "name": "PreRegInstructions",
+                              "type": "literal",
+                              "value": "<br />\n<p><b>Welcome to the Preregistration application!</b></p>\n<p>Here's what you can do with this application.\n<br /> &bull; Add and Drop preregistration courses.\n<br /> &bull; Change preregistration course point allocations.\n<br /> &bull; Change a preregistration course's Grading Track.</p>\n\n<p><b>Adding a Course</b></p>\n<p>&bull; Adding a course to your schedule is easy as pie!\n<br /> &bull; Go to the &ldquo;Course Add&rdquo; section. You should see your name and student ID number.\n<br /> &bull; If you happen to know the CRN of the course you wish to add, then just enter it here and click the Add Course button.\n<br /> &bull; Alas, the above is not usually the norm. More often you will need to look-up the CRN (Course Reference Number) for the course you wish to add.\n<br /> &bull; To look-up a course, press the &ldquo;Search Class Schedule&rdquo; button and then scroll down to the bottom of the page.\n<br /> &bull; Here you will find filters to restrict your class search. Only the Term filter is required, but please note that results are limited to the first 200 classes found, so be as specific as possible.\n<br /> &bull; Once you have chosen your filter, then press the &ldquo;Class Search&rdquo; button to load the results of the search.\n<br /> &bull; Find the class you wish to add and then click on the corresponding checkbox on the left. This will then close this section and the Class Schedule Search section and the chosen course will appear in the Preregistration Choices section above.\n<br /> &bull; All added courses will default to <b>0</b> points, and a <b>G</b> grading track.</p>\n\n<p><b>Course Point Allocation</b></p>\n<p>&bull; After adding a course, then you can change the number of points you wish to allocate to that course.\n<br /> &bull; Point allocation should reflect your course priority (higher points = stronger priority).\n<br /> &bull; Use the course's corresponding input box under the Points column to change your course point allocations.\n<br /> &bull; There are a maximum of 40 points per term that you can allocate.\n<br /> &bull; Each course must have at least one point allocated.</p>",
+                              "style": ""
+                        },
+                        {
+                              "name": "PreRegClosed",
+                              "type": "literal",
+                              "value": "Preregistration is closed."
+                        }
+                  ]
+            },
+            {
+                  "name": "BlockNull01",
+                  "type": "block",
+                  "label": "",
+                  "style": "blockSpace",
+                  "showInitially": true,
+                  "components": [
+                        {
+                              "name": "BlockSpace01",
+                              "type": "literal",
+                              "value": "&nbsp;"
+                        }
+                  ]
+            },
+            {
+                  "name": "BlockStuLookup",
+                  "type": "block",
+                  "style": "blocks",
+                  "showInitially": false,
+                  "components": [
+                        {
+                              "name": "LookupInstructions",
+                              "type": "literal",
+                              "label": "",
+                              "style": "",
+                              "value": "<center>Enter a Student's ID or First Name or Last Name</center>"
+                        },
+                        {
+                              "name": "StuLookupForm",
+                              "type": "form",
+                              "style": "blockLookup",
+                              "nextButtonLabel": "Next",
+                              "showInitially": true,
+                              "components": [
+                                    {
+                                          "name": "StuLookup",
+                                          "type": "text",
+                                          "label": "",
+                                          "style": "flex",
+                                          "model": "",
+                                          "parameters": {},
+                                          "validation": {},
+                                          "readonly": false,
+                                          "required": false,
+                                          "loadInitially": true,
+                                          "onLoad": "",
+                                          "placeholder": ""
+                                    },
+                                    {
+                                          "name": "StuSearch",
+                                          "type": "button",
+                                          "label": "Search",
+                                          "style": "flex",
+                                          "onClick": "var stuLkup = document.StuLookupForm.StuLookup.value;\n\nif (stuLkup.replace(/^\\s+/g, '').length == 0) {\n  document.StuLookupForm.StuLookup.focus();\n  alert(\"Student Lookup is empty.\", {flash: true,type:\"error\"});\n  return;\n}\n\ndocument.getElementById('pbid-StuSelect').options[0].text = 'Loading...';\n\n$StuSelect.$populateSource();"
+                                    },
+                                    {
+                                          "name": "StuSelect",
+                                          "type": "select",
+                                          "sourceModel": "studentLookup",
+                                          "labelKey": "STU_FULL_NAME",
+                                          "valueKey": "STU_PIDM",
+                                          "style": "flex",
+                                          "sourceParameters": {
+                                                "stu_lookup": "$StuLookup"
+                                          },
+                                          "model": "StuSelect",
+                                          "required": false,
+                                          "placeholder": "Waiting for a Lookup Value...",
+                                          "loadInitially": false,
+                                          "onLoad": "document.getElementById('pbid-StuSearch').click();\n\nif (document.getElementById('pbid-StuSelect').options.length > 1) {\n  document.getElementById('pbid-StuSelect').options[0].text = 'Select a Student';\n}\nelse {\n  document.getElementById('pbid-StuSelect').options[0].text = 'No Students Found';\n}",
+                                          "onError": "",
+                                          "value": "",
+                                          "onUpdate": "// StuSelect - onUpdate\n\n// Selected student is changing\n\n// Assign chosen student's values\nvar stuSelect = $StuSelect.$selected?$StuSelect.$selected. STU_PIDM:null;\n$PassPIDM = $StuSelect.$selected?$StuSelect.$selected. STU_PIDM:null;\nvar userSource = document.getElementById('pbid-UserSource').value;\n\nif (stuSelect != null) {\n  $AddEntryStuName.$load({clearCache:true});\n  $AddEntryStuClass.$load({clearCache:true});\n  $CoursesTable.$load({clearCache:true});\n  $BlockNull04.$visible = false;\n  $BlockClassSearch.$visible = false;\n  $BlockNull05.$visible = false;\n  $BlockCourseAdd.$visible = false;\n}\nelse {\n  // Hide all Blocks\n  $BlockNull02.$visible = false;\n  $BlockAddClasses.$visible = false;\n  $BlockNull03.$visible = false;\n  $BlockStuCourses.$visible = false;\n}",
+                                          "label": ""
+                                    }
+                              ]
+                        }
+                  ]
+            },
+            {
+                  "name": "BlockNull02",
+                  "type": "block",
+                  "style": "blockSpace",
+                  "showInitially": false,
+                  "components": [
+                        {
+                              "name": "BlockSpace02",
+                              "type": "literal",
+                              "value": "&nbsp;"
+                        }
+                  ]
+            },
+            {
+                  "name": "BlockAddClasses",
+                  "type": "block",
+                  "style": "blocks",
+                  "showInitially": false,
+                  "components": [
+                        {
+                              "name": "AddCourseLabel",
+                              "type": "literal",
+                              "value": "Course Add"
+                        },
+                        {
+                              "name": "AddEntryDisplayForm",
+                              "type": "form",
+                              "style": "blockAddEntry",
+                              "nextButtonLabel": "Next",
+                              "showInitially": true,
+                              "components": [
+                                    {
+                                          "name": "AddEntryStuName",
+                                          "type": "text",
+                                          "label": "Name:",
+                                          "style": "blockAddEntry",
+                                          "labelStyle": "",
+                                          "loadInitially": true,
+                                          "value": "",
+                                          "model": "getStudent.STU_NAME_ID",
+                                          "parameters": {
+                                                "stu_pidm": "$PassPIDM"
+                                          },
+                                          "validation": {},
+                                          "readonly": false,
+                                          "required": false,
+                                          "onLoad": "// Make these fields read only\ndocument.getElementById('pbid-AddEntryStuName').readOnly = true;\ndocument.getElementById('pbid-AddEntryStuClass').readOnly = true;\ndocument.getElementById('pbid-AddVerifyCIDTitle').readOnly = true;\ndocument.getElementById('pbid-AddVerifyInstructor').readOnly = true;\ndocument.getElementById('pbid-AddVerifyBlockUnit').readOnly = true;\ndocument.getElementById('pbid-AddMessage').readOnly = true;\ndocument.getElementById('pbid-DropMessage').readOnly = true;",
+                                          "valueStyle": ""
+                                    },
+                                    {
+                                          "name": "AddEntryStuClass",
+                                          "type": "text",
+                                          "label": "Class:",
+                                          "loadInitially": true,
+                                          "value": "",
+                                          "model": "getStudent.STU_CLASS",
+                                          "parameters": {
+                                                "stu_pidm": "$PassPIDM"
+                                          },
+                                          "validation": {},
+                                          "readonly": false,
+                                          "required": false,
+                                          "onLoad": "",
+                                          "style": "blockAddEntry",
+                                          "labelStyle": ""
+                                    }
+                              ],
+                              "label": "",
+                              "submit": ""
+                        },
+                        {
+                              "name": "Class",
+                              "type": "form",
+                              "style": "blockInline",
+                              "nextButtonLabel": "Next",
+                              "showInitially": true,
+                              "components": [
+                                    {
+                                          "name": "ClassCRN",
+                                          "type": "text",
+                                          "style": "flex",
+                                          "parameters": {},
+                                          "validation": {},
+                                          "readonly": false,
+                                          "required": false,
+                                          "loadInitially": true,
+                                          "label": "CRN",
+                                          "onLoad": ""
+                                    },
+                                    {
+                                          "name": "ClassConsent",
+                                          "type": "text",
+                                          "style": "flex",
+                                          "parameters": {},
+                                          "validation": {},
+                                          "readonly": false,
+                                          "required": false,
+                                          "loadInitially": true,
+                                          "label": "Consent Passcode"
+                                    }
+                              ]
+                        },
+                        {
+                              "name": "AddClassesButtons",
+                              "type": "form",
+                              "label": "",
+                              "style": "blockInline",
+                              "nextButtonLabel": "Next",
+                              "showInitially": true,
+                              "components": [
+                                    {
+                                          "name": "SearchClassSchedule",
+                                          "type": "button",
+                                          "label": "Search Class Schedule",
+                                          "onClick": "// Show/Hide the Class Schedule search section\n\nif ($BlockClassSearch.$visible == false) {\n  $BlockNull04.$visible = true;\n  $BlockClassSearch.$visible = true;\n  $BlockNull05.$visible = true;\n  $BlockCourseAdd.$visible = true;\n  $SearchTermSelect.$load({clearCache:true});\n  $SearchSubjectSelect.$load({clearCache:true});\n  $SearchBlockSelect.$load({clearCache:true});\n  $SearchInstructorSelect.$load({clearCache:true});\n  $SearchDegReqSelect.$load({clearCache:true});\n  $SearchCampusSelect.$load({clearCache:true});\n  alert(\"Class Schedule form displayed below.\", {flash: true});\n}\nelse {\n  $BlockClassSearch.$visible = false;\n  $BlockNull05.$visible = false;\n  $BlockCourseAdd.$visible = false;\n}"
+                                    },
+                                    {
+                                          "name": "AddCourseButton",
+                                          "type": "button",
+                                          "label": "Add Course",
+                                          "onClick": "// AddCourseButton - onClick\n\nreturn;"
+                                    },
+                                    {
+                                          "name": "AddCourseReset",
+                                          "type": "button",
+                                          "label": "Reset",
+                                          "onClick": "return;"
+                                    }
+                              ]
+                        }
+                  ]
+            },
+            {
+                  "name": "BlockNull03",
+                  "type": "block",
+                  "style": "blockSpace",
+                  "showInitially": false,
+                  "components": [
+                        {
+                              "name": "BlockSpace03",
+                              "type": "literal",
+                              "value": "&nbsp;"
+                        }
+                  ]
+            },
+            {
+                  "name": "BlockStuCourses",
+                  "type": "block",
+                  "showInitially": false,
+                  "components": [
+                        {
+                              "name": "CoursesTableLabel",
+                              "type": "literal",
+                              "value": "Preregistration Choices"
+                        },
+                        {
+                              "name": "CoursesTable",
+                              "type": "htable",
+                              "model": "getStuCourses",
+                              "parameters": {
+                                    "stu_pidm": "$PassPIDM",
+                                    "pre_reg_term": "document.getElementById(\"pbid-PreRegTerm\").value"
+                              },
+                              "allowNew": false,
+                              "allowModify": true,
+                              "allowDelete": false,
+                              "allowReload": false,
+                              "pageSize": 20,
+                              "loadInitially": false,
+                              "components": [
+                                    {
+                                          "name": "Track",
+                                          "type": "select",
+                                          "label": "Action",
+                                          "model": "",
+                                          "loadInitially": false,
+                                          "sourceModel": "getGradingTrack",
+                                          "labelKey": "TRACK_LABEL",
+                                          "valueKey": "TRACK_VALUE",
+                                          "sourceParameters": {},
+                                          "required": false,
+                                          "onUpdate": "// Show the CoursesButtons\ndocument.getElementById('pbid-CoursesUpdate').style.display = 'block';\ndocument.getElementById('pbid-CoursesReset').style.display = 'block';",
+                                          "onLoad": ""
+                                    },
+                                    {
+                                          "name": "TermDesc",
+                                          "type": "display",
+                                          "label": "Term",
+                                          "model": "TERM_DESC",
+                                          "loadInitially": false,
+                                          "asHtml": false
+                                    },
+                                    {
+                                          "name": "CRN",
+                                          "type": "display",
+                                          "label": "CRN",
+                                          "model": "CRN",
+                                          "loadInitially": false,
+                                          "asHtml": false
+                                    },
+                                    {
+                                          "name": "CourseID",
+                                          "type": "display",
+                                          "label": "Course ID",
+                                          "model": "COURSE_ID",
+                                          "loadInitially": false,
+                                          "asHtml": false
+                                    },
+                                    {
+                                          "name": "Title",
+                                          "type": "display",
+                                          "label": "Title",
+                                          "model": "TITLE",
+                                          "loadInitially": false,
+                                          "asHtml": false
+                                    },
+                                    {
+                                          "name": "Units",
+                                          "type": "display",
+                                          "label": "Units",
+                                          "model": "UNITS",
+                                          "loadInitially": false,
+                                          "asHtml": false
+                                    },
+                                    {
+                                          "name": "Block",
+                                          "type": "display",
+                                          "label": "Block",
+                                          "model": "BLOCK",
+                                          "loadInitially": false,
+                                          "asHtml": false
+                                    },
+                                    {
+                                          "name": "Points",
+                                          "type": "text",
+                                          "label": "Points",
+                                          "model": "POINTS",
+                                          "parameters": {},
+                                          "validation": {},
+                                          "readonly": false,
+                                          "required": false,
+                                          "loadInitially": false,
+                                          "onLoad": "",
+                                          "onUpdate": "// Update Total Points value\n\nvar i = 0;\nvar j = document.getElementById('pbid-TotalPointsIndex').value;\nvar points = 0;\nvar pointTotal = 0;\n\nfor (i=0; i<j; i++) {\n\n  // Numeric Input Only\n  points = document.getElementById('pbid-Points-' + i).value.replace(/[^0-9]/g,'');\n  if (points == '') {\n    points = 0;\n  }\n  points = parseInt(points);\n  document.getElementById('pbid-Points-' + i).value = points;\n\n  pointTotal = pointTotal + points;  // Sum points\n}\n\ndocument.getElementById('pbid-Points-' + j).value = pointTotal;  // Update Total Points\n\nif (pointTotal > 40) {\n  document.getElementById('pbid-Points-' + j).style.color = 'red';\n}\nelse {\n  document.getElementById('pbid-Points-' + j).style.color = 'black';\n}\n\n// Show the CoursesButtons\ndocument.getElementById('pbid-CoursesUpdate').style.display = 'block';\ndocument.getElementById('pbid-CoursesReset').style.display = 'block';"
+                                    },
+                                    {
+                                          "name": "Instructor",
+                                          "type": "display",
+                                          "label": "Instructor",
+                                          "model": "INSTRUCTOR",
+                                          "loadInitially": false,
+                                          "asHtml": false
+                                    },
+                                    {
+                                          "name": "Status",
+                                          "type": "display",
+                                          "label": "Status",
+                                          "model": "REG_STATUS",
+                                          "loadInitially": false,
+                                          "asHtml": false
+                                    },
+                                    {
+                                          "name": "TrackLabel",
+                                          "type": "hidden",
+                                          "model": "TRACKDESC",
+                                          "loadInitially": false
+                                    }
+                              ],
+                              "onLoad": "// CoursesTable - onLoad\n\nvar table = document.getElementById(\"pbid-CoursesTable\");\nvar paws;\nvar i = 0;\nvar j = 0;\nvar k = 0;\nvar points = 0;\n\n// Initially Hide the DropGrid buttons\ndocument.getElementById('pbid-CoursesUpdate').style.display = 'none';\ndocument.getElementById('pbid-CoursesReset').style.display = 'none';\n\n// Populate Track select labels and values\n$Track.$load();\n\n// Allow time for the database call to finish\nfunction waitForIt() {\n  paws = setTimeout(go, 200);\n}\n\n// Go\nfunction go() {\n  for (i=0; i<table.rows.length-1; i++) {\n    document.getElementById('pbid-Points-' + i).removeAttribute('readonly');\n    points = points + parseInt(document.getElementById('pbid-Points-' + i).value);\n\n    // Select Grading Track option based on database value\n    trackLabel = $CoursesTable.$data[i].TRACKDESC;\n    if (document.getElementById(\"pbid-Track-\" + i).options.length == 4) {\n      document.getElementById(\"pbid-Track-\" + i).remove(0);  // Remove first option, it's blank\n    }\n    document.getElementById('pbid-UserButton').click();\n    for (k=0; k < document.getElementById(\"pbid-Track-\" + i).options.length; k++) {\n      if (document.getElementById(\"pbid-Track-\" + i).options[k].text == trackLabel) {\n        document.getElementById(\"pbid-Track-\" + i).selectedIndex = k;\n        break;\n      }\n    }\n  }\n\n  // Set Styling of Point Total Line\n  j = i - 1;\n  document.getElementById('pbid-Track-' + j).style.display = 'none';\n  document.getElementById('pbid-Points-' + j).readOnly = true;\n  document.getElementById('pbid-Points-' + j).style.border = '0px';\n  document.getElementById('pbid-Points-' + j).style.boxShadow = 'inset 4px 4px 4px #FFFFFF';\n  document.getElementById('pbid-Points-' + j).style.fontWeight = 'bold';\n  document.getElementById('pbid-Points-' + j).style.fontSize = '115%';\n  document.getElementById('pbid-Points-' + j).style.paddingBottom = '14px';\n  document.getElementById('pbid-Points-' + j).style.paddingRight = '21px';\n  document.getElementById('pbid-Instructor-' + j).style.fontWeight = 'bold';\n  document.getElementById('pbid-Instructor-' + j).style.fontSize = '115%';\n\n  // Save the Total Points Index\n  document.getElementById('pbid-TotalPointsIndex').value = j;\n\n  // Show the Add Classes Block\n  $BlockNull02.$visible = true;\n  $BlockAddClasses.$visible = true;\n\n  // Show or Hide the Student Courses Block\n  if (j > 0) {\n    $BlockNull03.$visible = true;\n    $BlockStuCourses.$visible = true;\n  }\n  else {\n    $BlockNull03.$visible = false;\n    $BlockStuCourses.$visible = false;\n  }\n\n  document.getElementById('pbid-UserButton').click();\n}\n\nwaitForIt();"
+                        },
+                        {
+                              "name": "CoursesButtons",
+                              "type": "form",
+                              "style": "blockInline",
+                              "nextButtonLabel": "Next",
+                              "showInitially": true,
+                              "components": [
+                                    {
+                                          "name": "CoursesUpdate",
+                                          "type": "button",
+                                          "label": "Submit Changes",
+                                          "onClick": "// CoursesUpdate - onClick\n\n// Validate allocated course points\nif (parseInt(document.getElementById('pbid-Points-' + document.getElementById('pbid-TotalPointsIndex').value).value) > parseInt(document.getElementById('pbid-MaxPoints').value)) {\n\tconfirm(\"Too many points allocated (\" + document.getElementById('pbid-Points-' + document.getElementById('pbid-TotalPointsIndex').value).value + \"). Maximum point count for this term is \" + document.getElementById('pbid-MaxPoints').value + '.');\n\treturn;\n}"
+                                    },
+                                    {
+                                          "name": "CoursesReset",
+                                          "type": "button",
+                                          "label": "Reset",
+                                          "onClick": "// Reload the CoursesTable from the database\n$CoursesTable.$load({clearCache:true});"
+                                    }
+                              ]
+                        }
+                  ],
+                  "style": "blocks"
+            },
+            {
+                  "name": "BlockNull04",
+                  "type": "block",
+                  "showInitially": false,
+                  "components": [
+                        {
+                              "name": "BlockSpace04",
+                              "type": "literal",
+                              "value": "&nbsp;"
+                        }
+                  ],
+                  "style": "blockSpace"
+            },
+            {
+                  "name": "BlockClassSearch",
+                  "type": "block",
+                  "style": "blockForm",
+                  "showInitially": false,
+                  "components": [
+                        {
+                              "name": "ClassSearch",
+                              "type": "form",
+                              "nextButtonLabel": "Next",
+                              "showInitially": true,
+                              "components": [
+                                    {
+                                          "name": "SearchTermSelect",
+                                          "type": "select",
+                                          "sourceModel": "getTermSelect",
+                                          "labelKey": "TERM_LABEL",
+                                          "valueKey": "TERM_VALUE",
+                                          "sourceParameters": {
+                                                "pre_reg_term": "document.getElementById(\"pbid-PreRegTerm\").value"
+                                          },
+                                          "required": false,
+                                          "loadInitially": false,
+                                          "label": "Term",
+                                          "placeholder": "&nbsp;",
+                                          "onUpdate": "// Indicate SearchBlockSelect and SearchInstructorSelect are loading\ndocument.getElementById('pbid-SearchBlockSelect').options[0].text = 'Loading...';\ndocument.getElementById('pbid-SearchInstructorSelect').options[0].text = 'Loading...';\n\n// Load SearchBlockSelect and SearchInstructorSelect select lists\n$SearchBlockSelect.$load({clearCache:true});\n$SearchInstructorSelect.$load({clearCache:true});",
+                                          "onLoad": ""
+                                    },
+                                    {
+                                          "name": "SearchSubjectSelect",
+                                          "type": "select",
+                                          "sourceModel": "getSubjects",
+                                          "labelKey": "SUBJECT_LABEL",
+                                          "valueKey": "SUBJECT_VALUE",
+                                          "label": "Subject",
+                                          "sourceParameters": {},
+                                          "required": false,
+                                          "placeholder": "&nbsp;",
+                                          "loadInitially": false,
+                                          "onLoad": "document.getElementById('pbid-SearchSubjectSelect').options[0].text = '';"
+                                    },
+                                    {
+                                          "name": "SearchCourseNumber",
+                                          "type": "text",
+                                          "label": "Course Reference Number",
+                                          "parameters": {},
+                                          "validation": {},
+                                          "readonly": false,
+                                          "required": false,
+                                          "loadInitially": true,
+                                          "onLoad": ""
+                                    },
+                                    {
+                                          "name": "SearchCourseID",
+                                          "type": "text",
+                                          "label": "Course ID",
+                                          "parameters": {},
+                                          "validation": {},
+                                          "readonly": false,
+                                          "required": false,
+                                          "loadInitially": true
+                                    },
+                                    {
+                                          "name": "SearchCourseTitle",
+                                          "type": "text",
+                                          "label": "Course Title",
+                                          "parameters": {},
+                                          "validation": {},
+                                          "readonly": false,
+                                          "required": false,
+                                          "loadInitially": true
+                                    },
+                                    {
+                                          "name": "SearchBlockSelect",
+                                          "type": "select",
+                                          "sourceModel": "getBlocks",
+                                          "labelKey": "BLOCK_LABEL",
+                                          "valueKey": "BLOCK_VALUE",
+                                          "label": "Block",
+                                          "sourceParameters": {
+                                                "search_term": "$SearchTermSelect.$selected?$SearchTermSelect.$selected.TERM_VALUE:null"
+                                          },
+                                          "required": false,
+                                          "placeholder": "&nbsp;",
+                                          "loadInitially": false,
+                                          "value": "",
+                                          "onLoad": "document.getElementById('pbid-UserButton').click();\n\ndocument.getElementById('pbid-SearchBlockSelect').options[0].text = '';",
+                                          "onUpdate": ""
+                                    },
+                                    {
+                                          "name": "SearchInstructorSelect",
+                                          "type": "select",
+                                          "sourceModel": "getInstructors",
+                                          "labelKey": "INSTR_LABEL",
+                                          "valueKey": "INSTR_VALUE",
+                                          "label": "Instructor",
+                                          "sourceParameters": {
+                                                "search_term": "$SearchTermSelect.$selected?$SearchTermSelect.$selected.TERM_VALUE:null"
+                                          },
+                                          "required": false,
+                                          "placeholder": "&nbsp;",
+                                          "loadInitially": false,
+                                          "onLoad": "document.getElementById('pbid-UserButton').click();\n\ndocument.getElementById('pbid-SearchInstructorSelect').options[0].text = '';"
+                                    },
+                                    {
+                                          "name": "SearchDegReqSelect",
+                                          "type": "select",
+                                          "sourceModel": "getDegreeRequirements",
+                                          "labelKey": "DEGREQ_LABEL",
+                                          "valueKey": "DEGREQ_VALUE",
+                                          "label": "Degree Requirement",
+                                          "sourceParameters": {},
+                                          "required": false,
+                                          "placeholder": "&nbsp;",
+                                          "loadInitially": false,
+                                          "onLoad": "document.getElementById('pbid-SearchDegReqSelect').options[0].text = '';"
+                                    },
+                                    {
+                                          "name": "SearchCampusSelect",
+                                          "type": "select",
+                                          "sourceModel": "getCampuses",
+                                          "labelKey": "CAMPUS_LABEL",
+                                          "valueKey": "CAMPUS_VALUE",
+                                          "label": "Campus",
+                                          "sourceParameters": {},
+                                          "required": false,
+                                          "placeholder": "&nbsp;",
+                                          "loadInitially": false,
+                                          "onLoad": "document.getElementById('pbid-SearchCampusSelect').options[0].text = '';"
+                                    }
+                              ],
+                              "label": "Class Schedule Search (200 results max)",
+                              "submitLabel": "Class Search",
+                              "submit": "// Edits\n\nif (document.getElementById('pbid-SearchTermSelect').options.selectedIndex == 0)  {\n  alert(\"Please select a term.\", {flash: true,type:\"error\"});\n  document.getElementById('pbid-SearchTermSelect').focus();\n  return;\n}\n\n\ndocument.getElementById(\"pbid-CourseAddSearchLabel\").innerHTML = \"Loading...\";\n\n$AddGrid.$load({clearCache:true});"
+                        }
+                  ]
+            },
+            {
+                  "name": "BlockNull05",
+                  "type": "block",
+                  "showInitially": false,
+                  "components": [
+                        {
+                              "name": "BlockSpace05",
+                              "type": "literal",
+                              "value": "&nbsp;"
+                        }
+                  ],
+                  "style": "blockSpace"
+            },
+            {
+                  "name": "BlockCourseAdd",
+                  "type": "block",
+                  "style": "blocks",
+                  "showInitially": false,
+                  "components": [
+                        {
+                              "name": "CourseAddSearchLabel",
+                              "type": "literal",
+                              "value": "Choose class schedule criteria to view available courses"
+                        },
+                        {
+                              "name": "CourseAddForm",
+                              "type": "form",
+                              "label": "",
+                              "nextButtonLabel": "Next",
+                              "showInitially": true,
+                              "components": [
+                                    {
+                                          "name": "AddGrid",
+                                          "type": "htable",
+                                          "model": "getAddGrid",
+                                          "parameters": {
+                                                "search_block": "$SearchBlockSelect.$selected?$SearchBlockSelect.$selected.BLOCK_VALUE:null",
+                                                "search_term": "$SearchTermSelect.$selected?$SearchTermSelect.$selected.TERM_VALUE:null",
+                                                "search_crn": "$SearchCourseNumber",
+                                                "search_course_id": "$SearchCourseID",
+                                                "search_title": "$SearchCourseTitle",
+                                                "search_subject": "$SearchSubjectSelect.$selected?$SearchSubjectSelect.$selected.SUBJECT_VALUE:null",
+                                                "search_instr": "$SearchInstructorSelect.$selected?$SearchInstructorSelect.$selected.INSTR_VALUE:null",
+                                                "search_degreq": "$SearchDegReqSelect.$selected?$SearchDegReqSelect.$selected.DEGREQ_VALUE:null",
+                                                "search_campus": "$SearchCampusSelect.$selected?$SearchCampusSelect.$selected.CAMPUS_VALUE:null"
+                                          },
+                                          "allowNew": false,
+                                          "allowModify": false,
+                                          "allowDelete": false,
+                                          "allowReload": false,
+                                          "pageSize": 250,
+                                          "loadInitially": false,
+                                          "components": [
+                                                {
+                                                      "name": "AddCourse",
+                                                      "type": "boolean",
+                                                      "label": "",
+                                                      "loadInitially": true,
+                                                      "booleanTrueValue": "1",
+                                                      "booleanFalseValue": "0",
+                                                      "readonly": false,
+                                                      "onUpdate": "// AddCourse - onUpdate\n\nvar rows = $AddGrid.$data.length;\nvar i = 0;\nvar k = 0;\n\n// Loop through all AddGrid rows\nfor (i=0; i<rows; i++) {\n\n  if (document.getElementById(\"pbid-AddCourse-\" + i).checked) {\n\n    // User checked an AddGrid's AddCourse checkbox\n\n    // Set Term within the AddEntryForm\n    /*for(k=0; k<document.getElementById('pbid-AddTermEntry').options.length; k++) {\n      if (document.getElementById('pbid-AddTermEntry').options[k].innerHTML == $AddGrid.$data[i].TERM) {\n        document.getElementById('pbid-AddTermEntry').selectedIndex = k;\n        break;\n      }\n    }*/\n\n    // Set the CRN within the AddEntryForm\n    $ClassCRN = $AddGrid.$data[i].CRN;\n\n    // Hide the Class Schedule Search and Class Schedule Search Results sections\n    $BlockNull04.$visible = false;\n    $BlockClassSearch.$visible = false;\n    $BlockCourseAdd.$visible = false;\n\n    // Reset the Class Search Results form\n    document.getElementById(\"pbid-AddCourse-\" + i).click();  // Maintain state of checkbox\n    document.getElementById(\"pbid-CourseAddForm\").reset();\n\n    break;\n  }\n}",
+                                                      "onLoad": "",
+                                                      "model": ""
+                                                },
+                                                {
+                                                      "name": "AddCRN",
+                                                      "type": "display",
+                                                      "model": "CRN",
+                                                      "loadInitially": false,
+                                                      "asHtml": true,
+                                                      "documentation": "",
+                                                      "onLoad": "// Addcourse - onLoad\n\n// Hide the non-course checkboxes - THIS IS NOT WORKING - LEAVING HERE FOR NOW FOR LATER RESOLUTION\nalert(\"TESTING\",{flash:true});\nvar addRows = $AddGrid.$data.length;\nvar k = 0;\nalert(addRows=\" + addRows,{flash:true});\n// Loop thru all AddGrid rows\nfor (k=0; k<addRows; k++) {\n\n  // Hide the AddCourse Checkboxes based on CRN\n  //if ($AddGrid.$data[k].CRN == '<b>CRN</b>' || $AddGrid.$data[k].CRN == '' || $AddGrid.$data[k].CRN == null) {\n\n\nalert(\"k=\" + k,{flash:true});\n\n\n     // document.getElementById(\"pbid-AddCourse-\" + k).style.display = 'none';\n  //}\n\n}"
+                                                },
+                                                {
+                                                      "name": "AddCourseID",
+                                                      "type": "display",
+                                                      "model": "COURSE_ID",
+                                                      "loadInitially": false,
+                                                      "asHtml": true
+                                                },
+                                                {
+                                                      "name": "AddTitle",
+                                                      "type": "display",
+                                                      "model": "TITLE",
+                                                      "loadInitially": false,
+                                                      "asHtml": true
+                                                },
+                                                {
+                                                      "name": "AddBlock",
+                                                      "type": "display",
+                                                      "model": "BLOCK",
+                                                      "loadInitially": false,
+                                                      "asHtml": true
+                                                },
+                                                {
+                                                      "name": "AddDates",
+                                                      "type": "display",
+                                                      "model": "DATES",
+                                                      "loadInitially": false,
+                                                      "asHtml": true
+                                                },
+                                                {
+                                                      "name": "AddTime",
+                                                      "type": "display",
+                                                      "model": "SESSION_TIME",
+                                                      "loadInitially": false,
+                                                      "asHtml": true
+                                                },
+                                                {
+                                                      "name": "AddUnits",
+                                                      "type": "display",
+                                                      "model": "UNITS",
+                                                      "loadInitially": false,
+                                                      "asHtml": true
+                                                },
+                                                {
+                                                      "name": "AddInstructor",
+                                                      "type": "display",
+                                                      "model": "INSTRUCTOR",
+                                                      "loadInitially": false,
+                                                      "asHtml": true
+                                                },
+                                                {
+                                                      "name": "AddLimit",
+                                                      "type": "display",
+                                                      "model": "LIMIT",
+                                                      "loadInitially": false,
+                                                      "asHtml": true
+                                                },
+                                                {
+                                                      "name": "AddReserved",
+                                                      "type": "display",
+                                                      "model": "RESERVED",
+                                                      "loadInitially": false,
+                                                      "asHtml": true
+                                                },
+                                                {
+                                                      "name": "AddClassSize",
+                                                      "type": "display",
+                                                      "model": "CLASS_SIZE",
+                                                      "loadInitially": false,
+                                                      "asHtml": true
+                                                },
+                                                {
+                                                      "name": "AddAvailable",
+                                                      "type": "display",
+                                                      "model": "AVAILABLE",
+                                                      "loadInitially": false,
+                                                      "asHtml": true
+                                                },
+                                                {
+                                                      "name": "AddWaitList",
+                                                      "type": "display",
+                                                      "model": "WAIT_LIST",
+                                                      "loadInitially": false,
+                                                      "asHtml": true
+                                                },
+                                                {
+                                                      "name": "AddLocation",
+                                                      "type": "display",
+                                                      "model": "LOCATION",
+                                                      "loadInitially": false,
+                                                      "asHtml": true
+                                                },
+                                                {
+                                                      "name": "AddDegReq",
+                                                      "type": "display",
+                                                      "model": "DEG_REQ",
+                                                      "loadInitially": false,
+                                                      "asHtml": true
+                                                },
+                                                {
+                                                      "name": "AddCampus",
+                                                      "type": "display",
+                                                      "model": "CAMPUS",
+                                                      "loadInitially": false,
+                                                      "asHtml": true
+                                                }
+                                          ],
+                                          "label": "",
+                                          "onLoad": "// AddGrid - onLoad\n\n// Set AddGrid Label\n\nvar termSelected = $SearchTermSelect.$selected?$SearchTermSelect.$selected.TERM_VALUE:null;\n\nif (termSelected == null) {\n  document.getElementById(\"pbid-CourseAddSearchLabel\").innerHTML = \"Choose class schedule criteria to view available courses.\";\n}\nelse {\n  document.getElementById(\"pbid-CourseAddSearchLabel\").innerHTML = \"Class Schedule Search Course Results\";\n}\n\n\n// Turn off the checkboxes for non-course rows\n\ndocument.getElementById('pbid-UserButton').click();\n\nvar table = document.getElementById(\"pbid-AddGrid\");\nvar CRN = '';\nvar i = 0;\n\n// Loop through all AddGrid rows\nfor (i=0; i<table.rows.length-1; i++) {\n\n  CRN = $AddGrid.$data[i].CRN;\n\n  if (CRN == '<b>CRN</b>' || CRN == '' || CRN == null) {\n    document.getElementById(\"pbid-AddCourse-\" + i).style.display = \"none\";  // Hide Checkbox\n  }\n\n}  // Close For Loop\n\ndocument.getElementById('pbid-UserButton').click();",
+                                          "onClick": ""
+                                    }
+                              ]
+                        }
+                  ]
+            }
+      ],
+      "style": "",
+      "importCSS": "ccStyleStuPreReg"
+}
