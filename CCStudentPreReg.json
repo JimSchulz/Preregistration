@@ -74,7 +74,7 @@
                   "name": "getGradingTrack",
                   "type": "resource",
                   "staticData": [],
-                  "resource": "virtualDomains.GenGradingTrackNoAudit"
+                  "resource": "virtualDomains.GenGradingTrackNoAuditNoDrop"
             },
             {
                   "name": "BlockHidden",
@@ -478,25 +478,11 @@
                               },
                               "allowNew": false,
                               "allowModify": true,
-                              "allowDelete": false,
+                              "allowDelete": true,
                               "allowReload": false,
                               "pageSize": 20,
                               "loadInitially": false,
                               "components": [
-                                    {
-                                          "name": "Track",
-                                          "type": "select",
-                                          "label": "Action",
-                                          "model": "",
-                                          "loadInitially": false,
-                                          "sourceModel": "getGradingTrack",
-                                          "labelKey": "TRACK_LABEL",
-                                          "valueKey": "TRACK_VALUE",
-                                          "sourceParameters": {},
-                                          "required": false,
-                                          "onUpdate": "// Show the CoursesButtons\ndocument.getElementById('pbid-CoursesUpdate').style.display = 'block';\ndocument.getElementById('pbid-CoursesReset').style.display = 'block';",
-                                          "onLoad": ""
-                                    },
                                     {
                                           "name": "TermDesc",
                                           "type": "display",
@@ -556,7 +542,21 @@
                                           "required": false,
                                           "loadInitially": false,
                                           "onLoad": "",
-                                          "onUpdate": "// Update Total Points value\n\nvar i = 0;\nvar j = document.getElementById('pbid-TotalPointsIndex').value;\nvar points = 0;\nvar pointTotal = 0;\n\nfor (i=0; i<j; i++) {\n\n  // Numeric Input Only\n  points = document.getElementById('pbid-Points-' + i).value.replace(/[^0-9]/g,'');\n  if (points == '') {\n    points = 0;\n  }\n  points = parseInt(points);\n  document.getElementById('pbid-Points-' + i).value = points;\n\n  pointTotal = pointTotal + points;  // Sum points\n}\n\ndocument.getElementById('pbid-Points-' + j).value = pointTotal;  // Update Total Points\n\nif (pointTotal > 40) {\n  document.getElementById('pbid-Points-' + j).style.color = 'red';\n}\nelse {\n  document.getElementById('pbid-Points-' + j).style.color = 'black';\n}\n\n// Show the CoursesButtons\ndocument.getElementById('pbid-CoursesUpdate').style.display = 'block';\ndocument.getElementById('pbid-CoursesReset').style.display = 'block';"
+                                          "onUpdate": "// Points - onUpdate\n\n// Update Total Points value\n\nvar i = 0;\nvar j = document.getElementById('pbid-TotalPointsIndex').value;\nvar points = 0;\nvar pointTotal = 0;\n\nfor (i=0; i<j; i++) {\n\n  // Numeric Input Only\n  points = document.getElementById('pbid-Points-' + i).value.replace(/[^0-9]/g,'');\n  if (points == '') {\n    points = 0;\n  }\n  points = parseInt(points);\n  document.getElementById('pbid-Points-' + i).value = points;\n\n  pointTotal = pointTotal + points;  // Sum points\n}\n\ndocument.getElementById('pbid-Points-' + j).value = pointTotal;  // Update Total Points\n\n// Change points total red if points total value goes over MaxPoints\nif (pointTotal > document.getElementById('pbid-MaxPoints').value) {\n  document.getElementById('pbid-Points-' + j).style.color = 'red';\n}\nelse {\n  document.getElementById('pbid-Points-' + j).style.color = 'black';\n}"
+                                    },
+                                    {
+                                          "name": "Track",
+                                          "type": "select",
+                                          "label": "Grading Track",
+                                          "model": "TRACKVALUE",
+                                          "loadInitially": false,
+                                          "sourceModel": "getGradingTrack",
+                                          "labelKey": "TRACK_LABEL",
+                                          "valueKey": "TRACK_VALUE",
+                                          "sourceParameters": {},
+                                          "required": false,
+                                          "onUpdate": "",
+                                          "onLoad": ""
                                     },
                                     {
                                           "name": "Instructor",
@@ -577,11 +577,24 @@
                                     {
                                           "name": "TrackLabel",
                                           "type": "hidden",
-                                          "model": "TRACKDESC",
+                                          "model": "TRACKLABEL",
+                                          "loadInitially": false
+                                    },
+                                    {
+                                          "name": "TrackValue",
+                                          "type": "hidden",
+                                          "model": "TRACKVALUE",
                                           "loadInitially": false
                                     }
                               ],
-                              "onLoad": "// CoursesTable - onLoad\n\nvar table = document.getElementById(\"pbid-CoursesTable\");\nvar paws;\nvar i = 0;\nvar j = 0;\nvar k = 0;\nvar points = 0;\n\n// Initially Hide the DropGrid buttons\ndocument.getElementById('pbid-CoursesUpdate').style.display = 'none';\ndocument.getElementById('pbid-CoursesReset').style.display = 'none';\n\n// Populate Track select labels and values\n$Track.$load();\n\n// Allow time for the database call to finish\nfunction waitForIt() {\n  paws = setTimeout(go, 200);\n}\n\n// Go\nfunction go() {\n  for (i=0; i<table.rows.length-1; i++) {\n    document.getElementById('pbid-Points-' + i).removeAttribute('readonly');\n    points = points + parseInt(document.getElementById('pbid-Points-' + i).value);\n\n    // Select Grading Track option based on database value\n    trackLabel = $CoursesTable.$data[i].TRACKDESC;\n    if (document.getElementById(\"pbid-Track-\" + i).options.length == 4) {\n      document.getElementById(\"pbid-Track-\" + i).remove(0);  // Remove first option, it's blank\n    }\n    document.getElementById('pbid-UserButton').click();\n    for (k=0; k < document.getElementById(\"pbid-Track-\" + i).options.length; k++) {\n      if (document.getElementById(\"pbid-Track-\" + i).options[k].text == trackLabel) {\n        document.getElementById(\"pbid-Track-\" + i).selectedIndex = k;\n        break;\n      }\n    }\n  }\n\n  // Set Styling of Point Total Line\n  j = i - 1;\n  document.getElementById('pbid-Track-' + j).style.display = 'none';\n  document.getElementById('pbid-Points-' + j).readOnly = true;\n  document.getElementById('pbid-Points-' + j).style.border = '0px';\n  document.getElementById('pbid-Points-' + j).style.boxShadow = 'inset 4px 4px 4px #FFFFFF';\n  document.getElementById('pbid-Points-' + j).style.fontWeight = 'bold';\n  document.getElementById('pbid-Points-' + j).style.fontSize = '115%';\n  document.getElementById('pbid-Points-' + j).style.paddingBottom = '14px';\n  document.getElementById('pbid-Points-' + j).style.paddingRight = '21px';\n  document.getElementById('pbid-Instructor-' + j).style.fontWeight = 'bold';\n  document.getElementById('pbid-Instructor-' + j).style.fontSize = '115%';\n\n  // Save the Total Points Index\n  document.getElementById('pbid-TotalPointsIndex').value = j;\n\n  // Show the Add Classes Block\n  $BlockNull02.$visible = true;\n  $BlockAddClasses.$visible = true;\n\n  // Show or Hide the Student Courses Block\n  if (j > 0) {\n    $BlockNull03.$visible = true;\n    $BlockStuCourses.$visible = true;\n  }\n  else {\n    $BlockNull03.$visible = false;\n    $BlockStuCourses.$visible = false;\n  }\n\n  document.getElementById('pbid-UserButton').click();\n}\n\nwaitForIt();"
+                              "onLoad": "// CoursesTable - onLoad\n\nvar rows = $CoursesTable.$data.length;\nvar row = 0;\nvar paws;\nvar j = 0;\nvar k = 0;\nvar points = 0;\n\n// Initially Hide the CoursesTable buttons\ndocument.getElementById('pbid-CoursesUpdate').style.display = 'none';\ndocument.getElementById('pbid-CoursesReset').style.display = 'none';\n\n// Populate Track select labels and values\n$Track.$load();\n\nwaitForIt();\n\n// Allow time for the database call to finish\nfunction waitForIt() {\n  paws = setTimeout(go, 200);\n}\n\n// Go\nfunction go() {\n  for (row=0; row<rows; row++) {\n    // Remove readonly attribute on Points input text objects\n    document.getElementById('pbid-Points-' + row).removeAttribute('readonly');\n    points = points + parseInt(document.getElementById('pbid-Points-' + row).value);\n  }\n\n  // Set Styling of Points Total Line\n  j = row - 1;\n  document.getElementById('pbid-Track-' + j).style.display = 'none';\n  document.getElementById('pbid-CoursesTabledelete-column-checkbox-' + j).style.display = 'none';\n  document.getElementById('pbid-Block-' + j).style.fontWeight = 'bold';  // \"Total\" text\n  document.getElementById('pbid-Block-' + j).style.fontSize = '115%';\n  document.getElementById('pbid-Points-' + j).readOnly = true;  // Points Total Styling\n  document.getElementById('pbid-Points-' + j).style.border = '0px';\n  document.getElementById('pbid-Points-' + j).style.boxShadow = 'inset 4px 4px 4px #FFFFFF';\n  document.getElementById('pbid-Points-' + j).style.fontWeight = 'bold';\n  document.getElementById('pbid-Points-' + j).style.fontSize = '115%';\n  document.getElementById('pbid-Points-' + j).style.paddingBottom = '14px';\n  document.getElementById('pbid-Points-' + j).style.paddingRight = '21px';\n\n  // Save the Total Points Index\n  document.getElementById('pbid-TotalPointsIndex').value = j;\n\n  // Show the Add Classes Block\n  $BlockNull02.$visible = true;\n  $BlockAddClasses.$visible = true;\n\n  // Show or Hide the Student Courses Block\n  if (j > 0) {\n    $BlockNull03.$visible = true;\n    $BlockStuCourses.$visible = true;\n  }\n  else {\n    $BlockNull03.$visible = false;\n    $BlockStuCourses.$visible = false;\n    alert(\"No preregistration records found.\",{flash:true});\n  }\n\n  document.getElementById('pbid-UserButton').click();\n}",
+                              "onSave": "",
+                              "onSaveSuccess": "alert(\"Successful Save!\",{flash:true});",
+                              "onError": "alert(\"Failed Save!\",{type:\"error\"});",
+                              "label": "",
+                              "deleteRecordLabel": "Drop",
+                              "saveDataLabel": "Save Changes",
+                              "onClick": ""
                         },
                         {
                               "name": "CoursesButtons",
