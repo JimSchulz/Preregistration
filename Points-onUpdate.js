@@ -22,13 +22,10 @@ for (i=0; i<j; i++) {
 
 document.getElementById('pbid-Points-' + j).value = pointTotal;  // Update Total Points
 
-if (pointTotal > 40) {
+// Change points total red if points total value goes over MaxPoints
+if (pointTotal > document.getElementById('pbid-MaxPoints').value) {
   document.getElementById('pbid-Points-' + j).style.color = 'red';
 }
 else {
   document.getElementById('pbid-Points-' + j).style.color = 'black';
 }
-
-// Show the CoursesButtons
-document.getElementById('pbid-CoursesUpdate').style.display = 'block';
-document.getElementById('pbid-CoursesReset').style.display = 'block';

@@ -1,18 +1,20 @@
 // CoursesTable - onLoad
 
-var table = document.getElementById("pbid-CoursesTable");
+var rows = $CoursesTable.$data.length;
+var row = 0;
 var paws;
-var i = 0;
 var j = 0;
 var k = 0;
 var points = 0;
 
-// Initially Hide the DropGrid buttons
+// Initially Hide the CoursesTable buttons
 document.getElementById('pbid-CoursesUpdate').style.display = 'none';
 document.getElementById('pbid-CoursesReset').style.display = 'none';
 
 // Populate Track select labels and values
 $Track.$load();
+
+waitForIt();
 
 // Allow time for the database call to finish
 function waitForIt() {
@@ -21,36 +23,25 @@ function waitForIt() {
 
 // Go
 function go() {
-  for (i=0; i<table.rows.length-1; i++) {
-    document.getElementById('pbid-Points-' + i).removeAttribute('readonly');
-    points = points + parseInt(document.getElementById('pbid-Points-' + i).value);
-
-    // Select Grading Track option based on database value
-    trackLabel = $CoursesTable.$data[i].TRACKDESC;
-    if (document.getElementById("pbid-Track-" + i).options.length == 4) {
-      document.getElementById("pbid-Track-" + i).remove(0);  // Remove first option, it's blank
-    }
-    document.getElementById('pbid-UserButton').click();
-    for (k=0; k < document.getElementById("pbid-Track-" + i).options.length; k++) {
-      if (document.getElementById("pbid-Track-" + i).options[k].text == trackLabel) {
-        document.getElementById("pbid-Track-" + i).selectedIndex = k;
-        break;
-      }
-    }
+  for (row=0; row<rows; row++) {
+    // Remove readonly attribute on Points input text objects
+    document.getElementById('pbid-Points-' + row).removeAttribute('readonly');
+    points = points + parseInt(document.getElementById('pbid-Points-' + row).value);
   }
 
-  // Set Styling of Point Total Line
-  j = i - 1;
+  // Set Styling of Points Total Line
+  j = row - 1;
   document.getElementById('pbid-Track-' + j).style.display = 'none';
-  document.getElementById('pbid-Points-' + j).readOnly = true;
+  document.getElementById('pbid-CoursesTabledelete-column-checkbox-' + j).style.display = 'none';
+  document.getElementById('pbid-Block-' + j).style.fontWeight = 'bold';  // "Total" text
+  document.getElementById('pbid-Block-' + j).style.fontSize = '115%';
+  document.getElementById('pbid-Points-' + j).readOnly = true;  // Points Total Styling
   document.getElementById('pbid-Points-' + j).style.border = '0px';
   document.getElementById('pbid-Points-' + j).style.boxShadow = 'inset 4px 4px 4px #FFFFFF';
   document.getElementById('pbid-Points-' + j).style.fontWeight = 'bold';
   document.getElementById('pbid-Points-' + j).style.fontSize = '115%';
   document.getElementById('pbid-Points-' + j).style.paddingBottom = '14px';
   document.getElementById('pbid-Points-' + j).style.paddingRight = '21px';
-  document.getElementById('pbid-Instructor-' + j).style.fontWeight = 'bold';
-  document.getElementById('pbid-Instructor-' + j).style.fontSize = '115%';
 
   // Save the Total Points Index
   document.getElementById('pbid-TotalPointsIndex').value = j;
@@ -67,9 +58,8 @@ function go() {
   else {
     $BlockNull03.$visible = false;
     $BlockStuCourses.$visible = false;
+    alert("No preregistration records found.",{flash:true});
   }
 
   document.getElementById('pbid-UserButton').click();
 }
-
-waitForIt();
