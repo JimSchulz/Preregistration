@@ -7,10 +7,6 @@ var j = 0;
 var k = 0;
 var points = 0;
 
-// Initially Hide the CoursesTable buttons
-document.getElementById('pbid-CoursesUpdate').style.display = 'none';
-document.getElementById('pbid-CoursesReset').style.display = 'none';
-
 // Populate Track select labels and values
 $Track.$load();
 
