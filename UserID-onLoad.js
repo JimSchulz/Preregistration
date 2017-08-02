@@ -100,8 +100,8 @@ function go() {
       // We do this to make JavaScript wait for completion of the $UserPIDM.$load DB call
         function secondFunction() {
         var promise = firstFunction();
-        promise.then(function(result) { 
-          var passPIDM = document.getElementById('pbid-UserPIDM').value;
+        promise.then(function(result) {
+          document.getElementById('pbid-PassPIDM').value = document.getElementById('pbid-UserPIDM').value;
         });
       }
 

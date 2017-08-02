@@ -315,10 +315,11 @@ label.pb-label.pb-boolean{
 #pbid-StuDropForm {
   text-align: left;
 }
-#pbid-AddCourseButton-container,
-#pbid-AddCourseReset-container,
-#pbid-CoursesReset-container {
+#pbid-AddCourseButton-container {
   padding-left: 1em;
+}
+#pbid-CoursesReset-container {
+  padding-top: 1em;
 }
 *[id^='pbid-Track'] {  /* CoursesTable - Track Objects */
   width: 10em !important;
