@@ -1,9 +1,11 @@
 // AddCourseButton - onClick
 
+var paws;
+
 // Retrieve input values from the Class form
 var crn = document.getElementById('pbid-ClassCRN').value;
 
-// Remove the value "string:" which was prefixed via the Class Schedule Search process.
+// Remove the value "string:" which was prefixed via the Class Schedule Search process
 var crn = crn.substring(crn.indexOf(":")+1,crn.length);
 
 // CRN maximum value edit
@@ -12,23 +14,24 @@ if (crn.length > 5) {
   return;
 }
 
-// Make the ClassCRN field read-only during this transaction session.
+// Make the ClassCRN field read-only during this transaction session
 document.getElementById('pbid-ClassCRN').readOnly = true;
 
 // Procedure call - Add Check - This checks the course being added
 $addClass.$post({  // ---------- addClass Post
   stu_pidm: $PassPIDM,
-  term_code: $PreRegTerm,
-  crn: crn,
+  term_code: document.getElementById('pbid-PreRegTerm').value,
+  crn: crn
 },
 null,
 function(response) {  // ---------- addClass Success
   // Success!
 
-  // Reload the CoursesTable from the database
-  $CoursesTable.$load({clearCache:true});
+  // Get add course messages
+  $Messages.$load({clearCache:true});
 
-  alert("Preregistration Course Added!",{flash:true});
+  // Wait for Messages to load
+  waitForIt();
 },
 function(response) {  // ---------- addClass Error
   var errorMessage = response.data.errors?response.data.errors.errorMessage:null;
@@ -43,14 +46,33 @@ function(response) {  // ---------- addClass Error
     errorMsg = errorMessage?errorMessage:response.data;
   }
   if (errorMsg) {
-    // Show the Add and Drop sections and hide the ProcessingData section
-    $BlockCourseAddEntry.$visible = true;
-    $BlockNull03.$visible = true;
-    $BlockCourseDrop.$visible = true;
-    $ProcessingData.$visible = false;
-
     alert("addClass Error: " + errorMsg,{type:"error"});  // Display Error
     return;
   }
 
 });  // ---------- addClass Close
+
+// Allow time for the $Messages database call to finish
+function waitForIt() {
+  paws = setTimeout(go, 100);
+}
+
+// Go
+function go() {
+
+  // Display Messages
+  if (document.getElementById('pbid-Messages').value) {
+    alert(document.getElementById('pbid-Messages').value,{type:"error"});
+  }
+
+  // Make the ClassCRN field accessible
+  document.getElementById('pbid-ClassCRN').readOnly = false;
+
+  // Reset the CRN input
+  document.getElementById('pbid-ClassCRN').value = '';
+
+  // Reload the CoursesTable from the database
+  $CoursesTable.$load({clearCache:true});
+
+  alert("Preregistration Course Added",{flash:true});
+}
