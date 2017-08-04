@@ -23,6 +23,11 @@ function go() {
     // Remove readonly attribute on Points input text objects
     document.getElementById('pbid-Points-' + row).removeAttribute('readonly');
     points = points + parseInt(document.getElementById('pbid-Points-' + row).value);
+
+    // Convert null to zero
+    if (document.getElementById('pbid-Points-' + row).value == '') {
+      document.getElementById('pbid-Points-' + row).value = 0;
+    }
   }
 
   // Set Styling of Points Total Line

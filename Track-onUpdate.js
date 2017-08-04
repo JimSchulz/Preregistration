@@ -1,4 +1,4 @@
-// Points - onUpdate
+// Track - onUpdate
 
 // Update Total Points value
 
