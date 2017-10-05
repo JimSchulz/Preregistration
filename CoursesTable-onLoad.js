@@ -20,8 +20,13 @@ function waitForIt() {
 // Go
 function go() {
   for (row=0; row<rows; row++) {
+
+    // Note that we extend the rows by one (row<rows) to allow for a Totalling row
+
     // Remove readonly attribute on Points input text objects
     document.getElementById('pbid-Points-' + row).removeAttribute('readonly');
+
+    // Total the points for the Total Points line
     points = points + parseInt(document.getElementById('pbid-Points-' + row).value);
 
     // Convert null to zero
@@ -63,4 +68,40 @@ function go() {
   }
 
   document.getElementById('pbid-UserButton').click();
+
+  loopForever();
+}
+
+function loopForever() {
+  paws = setTimeout(getRowCount, 250);
+}
+
+function getRowCount() {
+
+  // This function checks to see if a row from the $CoursesTable has been deleted.
+  // If a row has been deleted, then update the Total Points value.
+
+  if (document.getElementById('pbid-TotalPointsIndex').value != $CoursesTable.$data.length - 1) {
+
+    // Retotal the total point values
+    rows = $CoursesTable.$data.length;
+    row = 0;
+    points = 0;
+    for (row=0; row<rows-1; row++) {
+      if (document.getElementById('pbid-Points-' + row).value == '') {
+        // Convert null to zero
+        document.getElementById('pbid-Points-' + row).value = 0;
+      }
+      points = points + parseInt(document.getElementById('pbid-Points-' + row).value);
+    }
+
+    // Save the Total Points Index
+    j = $CoursesTable.$data.length - 1;
+    document.getElementById('pbid-TotalPointsIndex').value = j;
+
+    // Update Total Points
+    document.getElementById('pbid-Points-' + j).value = points;
+  }
+
+  loopForever();
 }
