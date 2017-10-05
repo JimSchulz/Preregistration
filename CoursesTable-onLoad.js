@@ -21,8 +21,6 @@ function waitForIt() {
 function go() {
   for (row=0; row<rows; row++) {
 
-    // Note that we extend the rows by one (row<rows) to allow for a Totalling row
-
     // Remove readonly attribute on Points input text objects
     document.getElementById('pbid-Points-' + row).removeAttribute('readonly');
 
