@@ -7,6 +7,8 @@ var j = document.getElementById('pbid-TotalPointsIndex').value;
 var points = 0;
 var pointTotal = 0;
 var allocated = 0;
+var trk;
+var trackCount = 0;
 
 for (i=0; i<j; i++) {
 
@@ -24,10 +26,21 @@ for (i=0; i<j; i++) {
   if (document.getElementById('pbid-Points-' + i).value > 0) {
     allocated++;
   }
+
+  // See if each Grading Track has been selected
+  trk = document.getElementById("pbid-Track-" + i);
+  if (trk.options[trk.selectedIndex].text > "") {
+    trackCount++;
+  }
 }
 
 // Each course needs to have at least one point allocated
 if (allocated < j) {
+  waitForIt();
+}
+
+// Each course needs to have a chosen Grading Track
+if (trackCount < j) {
   waitForIt();
 }
 
