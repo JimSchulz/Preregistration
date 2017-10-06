@@ -19,6 +19,8 @@ $PreRegTerm.$load({clearCache:true});
 $PreRegEndDate.$load({clearCache:true});
 $MaxPoints.$load({clearCache:true});
 
+waitForIt();
+
 // We pause a moment to allow DB retrieval time to complete
 function waitForIt() {
   paws = setTimeout(go, 300);
@@ -143,5 +145,3 @@ function go() {
 
   }
 } // function go
-
-waitForIt();
