@@ -3,9 +3,8 @@
 // Show/Hide the Class Schedule search section
 
 if ($BlockClassSearch.$visible == false) {
-  $BlockNull04.$visible = true;
   $BlockClassSearch.$visible = true;
-  $BlockNull05.$visible = true;
+  $BlockNull06.$visible = true;
   $BlockCourseAdd.$visible = true;
   $SearchTermSelect.$load({clearCache:true});
   $SearchSubjectSelect.$load({clearCache:true});
@@ -17,6 +16,6 @@ if ($BlockClassSearch.$visible == false) {
 }
 else {
   $BlockClassSearch.$visible = false;
-  $BlockNull05.$visible = false;
+  $BlockNull06.$visible = false;
   $BlockCourseAdd.$visible = false;
 }

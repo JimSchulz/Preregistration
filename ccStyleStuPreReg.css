@@ -181,7 +181,8 @@ label.pb-label.pb-boolean{
   display:inline-block;
 }
 
-/* Add and Drop Section Labels **********************************************************************/
+/* Section Labels ***********************************************************************************/
+#pbid-StuPreRegPasscodeLabel-container,
 #pbid-CourseAddLabel-container,
 #pbid-CourseDropLabel-container,
 #pbid-CourseAddSearchLabel-container {
@@ -255,6 +256,14 @@ label.pb-label.pb-boolean{
 #pbid-Points {
   width: 7em;
 }
+#pbid-StuPreRegPasscode-label {
+  font-weight: bold;
+  width: 13em;
+  display: block;
+  text-align: left;
+  padding-left: 0.2em;
+  padding-top: 0.2em;
+}
 #pbid-ClassCRN-label,
 #pbid-ClassConsent-label {
   font-weight: bold;
@@ -278,6 +287,13 @@ label.pb-label.pb-boolean{
 }
 #pbid-ClassConsent {
   width: 11em;
+}
+#pbid-StuPreRegPasscode {
+  width: 11em;
+  display: block;
+  text-align: left;
+  padding-left: 0.6em;
+  word-break: break-all;
 }
 #pbid-ClassCRN-label,
 #pbid-ClassConsent-label {
@@ -317,6 +333,10 @@ label.pb-label.pb-boolean{
 }
 #pbid-AddCourseButton-container {
   padding-left: 1em;
+}
+#pbid-StuPreRegPasscodeButton-container {
+  padding-left: 1em;
+  padding-top: 0.1em;
 }
 #pbid-CoursesReset-container {
   padding-top: 1em;

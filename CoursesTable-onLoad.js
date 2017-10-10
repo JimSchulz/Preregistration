@@ -51,17 +51,17 @@ function go() {
   document.getElementById('pbid-TotalPointsIndex').value = j;
 
   // Show the Add Classes Block
-  $BlockNull02.$visible = true;
   $BlockAddClasses.$visible = true;
+  $BlockNull04.$visible = true;
 
   // Show or Hide the Student Courses Block
   if (j > 0) {
-    $BlockNull03.$visible = true;
     $BlockStuCourses.$visible = true;
+    $BlockNull05.$visible = true;
   }
   else {
-    $BlockNull03.$visible = false;
     $BlockStuCourses.$visible = false;
+    $BlockNull05.$visible = false;
     alert("No preregistration records found.",{flash:true});
   }
 

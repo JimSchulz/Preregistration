@@ -8,6 +8,8 @@ var crn = document.getElementById('pbid-ClassCRN').value;
 // Remove the value "string:" which was prefixed via the Class Schedule Search process
 var crn = crn.substring(crn.indexOf(":")+1,crn.length);
 
+// CRN edits
+
 // CRN null edit
 if (crn.length == 0) {
   alert("CRN required.",{flash: true,type:"error"});
@@ -74,7 +76,7 @@ function go() {
     document.getElementById('pbid-AddCourseEdits').value = '';
   }
 
-  // Display any edit messages
+  // Display any CRN edit messages
   if (document.getElementById('pbid-AddCourseEdits').value > '') {
     alert(document.getElementById('pbid-AddCourseEdits').value,{flash: true,type:"error"});
     document.getElementById('pbid-ClassCRN').readOnly = false;
@@ -82,10 +84,36 @@ function go() {
     return;
   }
 
-  // -------------------- All CRN edits have passed validation --------------------
+  // Load consent PIN
+  $InstructorPIN.$load({clearCache:true});
+
+  waitForItAgain();
+}
+
+// Allow time for the database call to finish
+function waitForItAgain() {
+  paws = setTimeout(goAgain, 200);
+}
+
+function goAgain() {
+
+  // Instructor Consent edit
+  if (document.getElementById('pbid-InstructorPIN').value > '') {
+    if (document.getElementById('pbid-ClassConsent').value == '') {
+      alert("A Consent Passcode is required for the entered CRN.",{flash: true,type:"error"});
+      return;
+    }
+    if (document.getElementById('pbid-ClassConsent').value != document.getElementById('pbid-InstructorPIN').value) {
+      alert("The Consent Passcode you entered was not correct.",{flash: true,type:"error"});
+      return;
+    }
+  }
+
+  // All edits have passed, add preregistration course.
 
   // Make the ClassCRN field read only
   document.getElementById('pbid-ClassCRN').readOnly = true;
+  document.getElementById('pbid-ClassConsent').readOnly = true;
 
   // Procedure call - Add Check - This checks the course being added
   $addClass.$post({  // ---------- addClass Post
@@ -100,9 +128,11 @@ function go() {
 
     // Make the ClassCRN field accessible
     document.getElementById('pbid-ClassCRN').readOnly = false;
+    document.getElementById('pbid-ClassConsent').readOnly = false;
 
     // Reset the CRN input
     document.getElementById('pbid-ClassCRN').value = '';
+    document.getElementById('pbid-ClassConsent').value = '';
 
     // Reload the CoursesTable from the database
     $CoursesTable.$load({clearCache:true});
@@ -127,5 +157,4 @@ function go() {
     }
 
   });  // ---------- addClass Close
-
 }

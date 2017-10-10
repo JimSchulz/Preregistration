@@ -9,6 +9,7 @@ var endDate;
 // Initially, hide the PreRegInstructions and show the BlockPreRegInstructions
 document.getElementById("pbid-PreRegInstructions").style.display = "none";
 $BlockPreRegInstructions.$visible = true;
+$BlockNull01.$visible = true;
 
 // Initially, hide the PreRegClosed Literal
 document.getElementById('pbid-PreRegClosed').style.display = 'none';
@@ -50,7 +51,7 @@ function go() {
     // Determine what kind of user is signing on (Web Tailor)
     for (i=0; i<$$user.authorities.length; i++) {
       auth = $$user.authorities[i].objectName;
-      //alert(auth);  // Helpful Debug - Shows user's WebTailor Roles
+      //alert(auth,{flash:true});  // Helpful Debug - Shows user's WebTailor Roles
       if (auth.indexOf('WTAILORADMIN') > -1) {  // was GPBADMN
         userType = "Dev";
       }
@@ -64,6 +65,21 @@ function go() {
 
     if (userType == 'Reg' || userType == 'Dev') {
 
+
+
+
+
+
+      // Show the Preregistration Passcode block
+      $StuPreRegPasscodeBlock.$visible = true;
+      $BlockNull03.$visible = true;
+
+
+
+
+
+
+
       // Show the student lookup block
       $BlockStuLookup.$visible = true;
       $BlockNull02.$visible = true;
@@ -75,6 +91,10 @@ function go() {
       // Hide the student lookup block
       $BlockStuLookup.$visible = false;
       $BlockNull02.$visible = false;
+
+      // Show the Preregistration Passcode block
+      $StuPreRegPasscodeBlock.$visible = true;
+      $BlockNull03.$visible = true;
 
       // Prep data
       document.getElementById("pbid-UserSource").value = 'S';  // Student User
@@ -100,7 +120,7 @@ function go() {
 
       // The SecondFunction calls the FirstFunction
       // We do this to make JavaScript wait for completion of the $UserPIDM.$load DB call
-        function secondFunction() {
+      function secondFunction() {
         var promise = firstFunction();
         promise.then(function(result) {
           document.getElementById('pbid-PassPIDM').value = document.getElementById('pbid-UserPIDM').value;
@@ -116,7 +136,7 @@ function go() {
       $BlockStuLookup.$visible = false;
       $BlockNull02.$visible = false;
 
-      alert("You're not authorized to use the Drop/Add application.",{type:"error"});
+      alert("You're not authorized to use the Preregistration application.",{type:"error"});
     }
   }
   else {
@@ -132,15 +152,16 @@ function go() {
     document.getElementById("pbid-PreRegInstructions").style.display = "none";
 
     // Hide All Blocks
-    $BlockNull01.$visible = false;
     $BlockStuLookup.$visible = false;
     $BlockNull02.$visible = false;
-    $BlockAddClasses.$visible = false;
+    $StuPreRegPasscodeBlock = false;
     $BlockNull03.$visible = false;
-    $BlockStuCourses.$visible = false;
+    $BlockAddClasses.$visible = false;
     $BlockNull04.$visible = false;
-    $BlockClassSearch.$visible = false;
+    $BlockStuCourses.$visible = false;
     $BlockNull05.$visible = false;
+    $BlockClassSearch.$visible = false;
+    $BlockNull06.$visible = false;
     $BlockCourseAdd.$visible = false;
 
   }
