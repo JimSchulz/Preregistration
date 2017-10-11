@@ -65,21 +65,6 @@ function go() {
 
     if (userType == 'Reg' || userType == 'Dev') {
 
-
-
-
-
-
-      // Show the Preregistration Passcode block
-      $StuPreRegPasscodeBlock.$visible = true;
-      $BlockNull03.$visible = true;
-
-
-
-
-
-
-
       // Show the student lookup block
       $BlockStuLookup.$visible = true;
       $BlockNull02.$visible = true;

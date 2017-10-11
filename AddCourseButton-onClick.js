@@ -45,9 +45,6 @@ if (crn.substring(0,2) != document.getElementById('pbid-PreRegTerm').value.subst
   return;
 }
 
-// Make the ClassCRN field read-only during this transaction session
-document.getElementById('pbid-ClassCRN').readOnly = true;
-
 // CRN database edits
 $PreRegTerm = document.getElementById('pbid-PreRegTerm').value;
 $AddCourseEdits.$load({clearCache:true});
@@ -79,7 +76,6 @@ function go() {
   // Display any CRN edit messages
   if (document.getElementById('pbid-AddCourseEdits').value > '') {
     alert(document.getElementById('pbid-AddCourseEdits').value,{flash: true,type:"error"});
-    document.getElementById('pbid-ClassCRN').readOnly = false;
     document.getElementById('pbid-ClassCRN').focus();
     return;
   }
@@ -111,10 +107,6 @@ function goAgain() {
 
   // All edits have passed, add preregistration course.
 
-  // Make the ClassCRN field read only
-  document.getElementById('pbid-ClassCRN').readOnly = true;
-  document.getElementById('pbid-ClassConsent').readOnly = true;
-
   // Procedure call - Add Check - This checks the course being added
   $addClass.$post({  // ---------- addClass Post
     stu_pidm: $PassPIDM,
@@ -125,10 +117,6 @@ function goAgain() {
   function(response) {  // ---------- addClass Success
 
     // Success!
-
-    // Make the ClassCRN field accessible
-    document.getElementById('pbid-ClassCRN').readOnly = false;
-    document.getElementById('pbid-ClassConsent').readOnly = false;
 
     // Reset the CRN input
     document.getElementById('pbid-ClassCRN').value = '';

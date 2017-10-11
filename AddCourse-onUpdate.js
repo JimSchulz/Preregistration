@@ -11,20 +11,12 @@ for (i=0; i<rows; i++) {
 
     // User checked an AddGrid's AddCourse checkbox
 
-    // Set Term within the AddEntryForm
-    /*for(k=0; k<document.getElementById('pbid-AddTermEntry').options.length; k++) {
-      if (document.getElementById('pbid-AddTermEntry').options[k].innerHTML == $AddGrid.$data[i].TERM) {
-        document.getElementById('pbid-AddTermEntry').selectedIndex = k;
-        break;
-      }
-    }*/
-
     // Set the CRN within the AddEntryForm
     $ClassCRN = $AddGrid.$data[i].CRN;
 
-    // Hide the Class Schedule Search and Class Schedule Search Results sections
-    $BlockNull04.$visible = false;
+    // Hide the Class Schedule Search and Class Schedule Search Results blocks
     $BlockClassSearch.$visible = false;
+    $BlockNull06.$visible = false;
     $BlockCourseAdd.$visible = false;
 
     // Reset the Class Search Results form
