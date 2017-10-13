@@ -80,32 +80,58 @@ function go() {
     return;
   }
 
-  // Load consent PIN
+  // Load consent PINs
+  $ConsentRequired.$load({clearCache:true});
   $InstructorPIN.$load({clearCache:true});
+  $DepartmentPIN.$load({clearCache:true});
 
   waitForItAgain();
 }
 
 // Allow time for the database call to finish
 function waitForItAgain() {
-  paws = setTimeout(goAgain, 200);
+  paws = setTimeout(goAgain, 300);
 }
 
 function goAgain() {
 
-  // Instructor Consent edit
-  if (document.getElementById('pbid-InstructorPIN').value > '') {
-    if (document.getElementById('pbid-ClassConsent').value == '') {
-      alert("A Consent Passcode is required for the entered CRN.",{flash: true,type:"error"});
+  if (document.getElementById('pbid-ConsentRequired').value == 'D') {
+    
+    // Department consent is required
+
+    if (document.getElementById('pbid-DepartmentPIN').value == '') {
+      alert("Department consent is required for this CRN, but this subject has no passcode. Please contact the Registrar.",{flash: true,type:"error"});
       return;
     }
-    if (document.getElementById('pbid-ClassConsent').value != document.getElementById('pbid-InstructorPIN').value) {
-      alert("The Consent Passcode you entered was not correct.",{flash: true,type:"error"});
+    if (document.getElementById('pbid-ClassConsent').value == '') {
+      alert("Department consent is required for this CRN. Please enter the Consent Passcode.",{flash: true,type:"error"});
+      return;
+    }
+    if (document.getElementById('pbid-ClassConsent').value != document.getElementById('pbid-DepartmentPIN').value) {
+      alert("Department consent is required for this CRN and the Consent Passcode you entered is not the right one.",{flash: true,type:"error"});
       return;
     }
   }
 
-  // All edits have passed, add preregistration course.
+  if (document.getElementById('pbid-ConsentRequired').value == 'I') {
+    
+    // Instructor consent is required
+
+    if (document.getElementById('pbid-InstructorPIN').value == '') {
+      alert("Instructor consent is required for this CRN, but this instructor has no passcode. Please contact the Registrar.",{flash: true,type:"error"});
+      return;
+    }
+    if (document.getElementById('pbid-ClassConsent').value == '') {
+      alert("Instructor consent is required for this CRN. Please enter the Consent Passcode.",{flash: true,type:"error"});
+      return;
+    }
+    if (document.getElementById('pbid-ClassConsent').value != document.getElementById('pbid-InstructorPIN').value) {
+      alert("Instructor consent is required for this CRN and the Consent Passcode you entered is not the right one.",{flash: true,type:"error"});
+      return;
+    }
+  }
+
+  // All edits have passed. Add the preregistration course.
 
   // Procedure call - Add Check - This checks the course being added
   $addClass.$post({  // ---------- addClass Post
