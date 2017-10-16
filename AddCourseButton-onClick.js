@@ -1,7 +1,5 @@
 // AddCourseButton - onClick
 
-var paws;
-
 // Retrieve input values from the Class form
 var crn = document.getElementById('pbid-ClassCRN').value;
 
@@ -47,128 +45,171 @@ if (crn.substring(0,2) != document.getElementById('pbid-PreRegTerm').value.subst
 
 // CRN database edits
 $PreRegTerm = document.getElementById('pbid-PreRegTerm').value;
+document.getElementById('pbid-AddCourseEdits').value = '';
+$AddCourseEdits = '';
 $AddCourseEdits.$load({clearCache:true});
 
-waitForIt();
+waitForAddCourseEdits();
 
 
-// Allow time for the database call to finish
-function waitForIt() {
-  paws = setTimeout(go, 200);
-}
+function waitForAddCourseEdits() {
 
-// Go
-function go() {
+  // The waitForAddCourseEdits function calls the areAddCourseEditsLoaded function
+  // We do this to make JavaScript waits for the completion of the DB calls ($load)
 
-  // Debug
-  //alert("AddCourseEdits=" + document.getElementById('pbid-AddCourseEdits').value,{flash:true});
+  var promise = areAddCourseEditsLoaded();
+  promise.then(function(result) {
 
-  // Invalid CRN edit
-  if (document.getElementById('pbid-AddCourseEdits').value == '') {
-    document.getElementById('pbid-AddCourseEdits').value = 'Invalid CRN';
-  }
-
-  // No errors edit
-  if (document.getElementById('pbid-AddCourseEdits').value == 'zOK') {
-    document.getElementById('pbid-AddCourseEdits').value = '';
-  }
-
-  // Display any CRN edit messages
-  if (document.getElementById('pbid-AddCourseEdits').value > '') {
-    alert(document.getElementById('pbid-AddCourseEdits').value,{flash: true,type:"error"});
-    document.getElementById('pbid-ClassCRN').focus();
-    return;
-  }
-
-  // Load consent PINs
-  $ConsentRequired.$load({clearCache:true});
-  $InstructorPIN.$load({clearCache:true});
-  $DepartmentPIN.$load({clearCache:true});
-
-  waitForItAgain();
-}
-
-// Allow time for the database call to finish
-function waitForItAgain() {
-  paws = setTimeout(goAgain, 300);
-}
-
-function goAgain() {
-
-  if (document.getElementById('pbid-ConsentRequired').value == 'D') {
+    // Promise fulfilled.  Database AddCourseEdits variable has completed its load.
     
-    // Department consent is required
+    // Debug
+    //alert("AddCourseEdits=" + document.getElementById('pbid-AddCourseEdits').value,{flash:true});
 
-    if (document.getElementById('pbid-DepartmentPIN').value == '') {
-      alert("Department consent is required for this CRN, but this subject has no passcode. Please contact the Registrar.",{flash: true,type:"error"});
+    // Invalid CRN edit
+    if (document.getElementById('pbid-AddCourseEdits').value == '0') {
+      document.getElementById('pbid-AddCourseEdits').value = 'Invalid CRN';
+    }
+
+    // No errors edit
+    if (document.getElementById('pbid-AddCourseEdits').value == '1') {
+      document.getElementById('pbid-AddCourseEdits').value = '';
+    }
+
+    // Display any CRN edit messages
+    if (document.getElementById('pbid-AddCourseEdits').value > '') {
+      alert(document.getElementById('pbid-AddCourseEdits').value,{flash: true,type:"error"});
+      document.getElementById('pbid-ClassCRN').focus();
       return;
     }
-    if (document.getElementById('pbid-ClassConsent').value == '') {
-      alert("Department consent is required for this CRN. Please enter the Consent Passcode.",{flash: true,type:"error"});
-      return;
+
+    // Load consent PINs
+    $ConsentRequired.$load({clearCache:true});
+    $InstructorPIN.$load({clearCache:true});
+    $DepartmentPIN.$load({clearCache:true});
+
+    waitForPinsLoads();
+
+  });
+}
+
+function areAddCourseEditsLoaded() {  // See if the AddCourseEdits variable is loaded
+  var deferred = $.Deferred();
+  var nextStep = function() {
+    if ($AddCourseEdits == '') {
+      // AddCourseEdits are not loaded yet, wait a little more.
+      setTimeout(nextStep, 100); 
     }
-    if (document.getElementById('pbid-ClassConsent').value != document.getElementById('pbid-DepartmentPIN').value) {
-      alert("Department consent is required for this CRN and the Consent Passcode you entered is not the right one.",{flash: true,type:"error"});
-      return;
-    }
-  }
-
-  if (document.getElementById('pbid-ConsentRequired').value == 'I') {
-    
-    // Instructor consent is required
-
-    if (document.getElementById('pbid-InstructorPIN').value == '') {
-      alert("Instructor consent is required for this CRN, but this instructor has no passcode. Please contact the Registrar.",{flash: true,type:"error"});
-      return;
-    }
-    if (document.getElementById('pbid-ClassConsent').value == '') {
-      alert("Instructor consent is required for this CRN. Please enter the Consent Passcode.",{flash: true,type:"error"});
-      return;
-    }
-    if (document.getElementById('pbid-ClassConsent').value != document.getElementById('pbid-InstructorPIN').value) {
-      alert("Instructor consent is required for this CRN and the Consent Passcode you entered is not the right one.",{flash: true,type:"error"});
-      return;
-    }
-  }
-
-  // All edits have passed. Add the preregistration course.
-
-  // Procedure call - Add Check - This checks the course being added
-  $addClass.$post({  // ---------- addClass Post
-    stu_pidm: $PassPIDM,
-    term_code: document.getElementById('pbid-PreRegTerm').value,
-    crn: crn
-  },
-  null,
-  function(response) {  // ---------- addClass Success
-
-    // Success!
-
-    // Reset the CRN input
-    document.getElementById('pbid-ClassCRN').value = '';
-    document.getElementById('pbid-ClassConsent').value = '';
-
-    // Reload the CoursesTable from the database
-    $CoursesTable.$load({clearCache:true});
-
-    alert("Preregistration Course Added",{flash:true});
-  },
-  function(response) {  // ---------- addClass Error
-    var errorMessage = response.data.errors?response.data.errors.errorMessage:null;
-
-    if (response.data.errors.errorMessage) {
-      errorMsg = response.data.errors.errorMessage;
-    }
-    else if (response.data.errors[0].errorMessage) {
-      errorMsg = response.data.errors[0].errorMessage;
-    } 
     else {
-      errorMsg = errorMessage?errorMessage:response.data;
+      // AddCourseEdits have loaded
+      deferred.resolve("AddCourseEdits Loaded");
     }
-    if (errorMsg) {
-      alert("addClass Error: " + errorMsg,{type:"error"});  // Display Error
-      return;
+  }
+  nextStep();
+  return deferred.promise();
+}
+
+function waitForPinsLoads() {
+
+  // The waitForPinsLoads function calls the arePinsLoaded function
+  // We do this to make JavaScript waits for the completion of the DB calls ($load)
+
+  var promise = arePinsLoaded();
+  promise.then(function(result) {
+
+    // Promise fulfilled.  Database PIN variables have completed their loads.
+
+    if (document.getElementById('pbid-ConsentRequired').value == 'D') {
+    
+      // Department consent is required
+
+      if (document.getElementById('pbid-DepartmentPIN').value == '') {
+        alert("Department consent is required for this CRN, but this subject has no passcode. Please contact the Registrar.",{flash: true,type:"error"});
+        return;
+      }
+      if (document.getElementById('pbid-ClassConsent').value == '') {
+        alert("Department consent is required for this CRN. Please enter the Consent Passcode.",{flash: true,type:"error"});
+        return;
+      }
+      if (document.getElementById('pbid-ClassConsent').value != document.getElementById('pbid-DepartmentPIN').value) {
+        alert("Department consent is required for this CRN and the Consent Passcode you entered is not the right one.",{flash: true,type:"error"});
+        return;
+      }
     }
 
-  });  // ---------- addClass Close
+    if (document.getElementById('pbid-ConsentRequired').value == 'I') {
+    
+      // Instructor consent is required
+
+      if (document.getElementById('pbid-InstructorPIN').value == '') {
+        alert("Instructor consent is required for this CRN, but this instructor has no passcode. Please contact the Registrar.",{flash: true,type:"error"});
+        return;
+      }
+      if (document.getElementById('pbid-ClassConsent').value == '') {
+        alert("Instructor consent is required for this CRN. Please enter the Consent Passcode.",{flash: true,type:"error"});
+        return;
+      }
+      if (document.getElementById('pbid-ClassConsent').value != document.getElementById('pbid-InstructorPIN').value) {
+        alert("Instructor consent is required for this CRN and the Consent Passcode you entered is not the right one.",{flash: true,type:"error"});
+        return;
+      }
+    }
+
+    // All edits have passed. Add the preregistration course.
+
+    // Procedure call - Add Check - This checks the course being added
+    $addClass.$post({  // ---------- addClass Post
+      stu_pidm: $PassPIDM,
+      term_code: document.getElementById('pbid-PreRegTerm').value,
+      crn: crn
+    },
+    null,
+    function(response) {  // ---------- addClass Success
+
+      // Success!
+
+      // Reset the CRN input
+      document.getElementById('pbid-ClassCRN').value = '';
+      document.getElementById('pbid-ClassConsent').value = '';
+
+      // Reload the CoursesTable from the database
+      $CoursesTable.$load({clearCache:true});
+
+      alert("Preregistration Course Added",{flash:true});
+    },
+    function(response) {  // ---------- addClass Error
+      var errorMessage = response.data.errors?response.data.errors.errorMessage:null;
+
+      if (response.data.errors.errorMessage) {
+        errorMsg = response.data.errors.errorMessage;
+      }
+      else if (response.data.errors[0].errorMessage) {
+        errorMsg = response.data.errors[0].errorMessage;
+      } 
+      else {
+        errorMsg = errorMessage?errorMessage:response.data;
+      }
+      if (errorMsg) {
+        alert("addClass Error: " + errorMsg,{type:"error"});  // Display Error
+        return;
+      }
+    });  // ---------- addClass Close
+
+  });  // promise.then Close
+
+}      // waitForPinsLoads() Close
+
+function arePinsLoaded() {  // See if the PIN variables are loaded
+  var deferred2 = $.Deferred();
+  var nextStep2 = function() {
+    if ($ConsentRequired == null || $InstructorPIN == null || $DepartmentPIN == null) {
+      // PIN variables are not loaded yet, wait a little more.
+      setTimeout(nextStep2, 100); 
+    }
+    else {
+      // PIN variables have loaded
+      deferred2.resolve("PIN Variables Loaded");
+    }
+  }
+  nextStep2();
+  return deferred2.promise();
 }
