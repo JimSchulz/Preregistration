@@ -89,10 +89,34 @@
                   "resource": "virtualDomains.PreRegInfo"
             },
             {
-                  "name": "getMessages",
+                  "name": "getEdits",
                   "type": "resource",
                   "staticData": [],
-                  "resource": "virtualDomains.PreReqMessages"
+                  "resource": "virtualDomains.PreReqEdits"
+            },
+            {
+                  "name": "getInstrPIN",
+                  "type": "resource",
+                  "staticData": [],
+                  "resource": "virtualDomains.PreRegInstrPIN"
+            },
+            {
+                  "name": "getStuPIN",
+                  "type": "resource",
+                  "staticData": [],
+                  "resource": "virtualDomains.PreRegStuPIN"
+            },
+            {
+                  "name": "getDeptPIN",
+                  "type": "resource",
+                  "staticData": [],
+                  "resource": "virtualDomains.PreRegDeptPIN"
+            },
+            {
+                  "name": "getConsentRequired",
+                  "type": "resource",
+                  "staticData": [],
+                  "resource": "virtualDomains.PreReqConsentRequired"
             },
             {
                   "name": "BlockHidden",
@@ -108,7 +132,7 @@
                               "readonly": false,
                               "required": false,
                               "loadInitially": true,
-                              "onLoad": "// UserID - onLoad\n\nvar userType = '';\nvar auth = '';\nvar paws;\nvar today = new Date();\nvar endDate;\n\n// Initially, hide the PreRegInstructions and show the BlockPreRegInstructions\ndocument.getElementById(\"pbid-PreRegInstructions\").style.display = \"none\";\n$BlockPreRegInstructions.$visible = true;\n\n// Initially, hide the PreRegClosed Literal\ndocument.getElementById('pbid-PreRegClosed').style.display = 'none';\n\n// Get the Preregistration Term\n$PreRegType.$load({clearCache:true});\n$PreRegTerm.$load({clearCache:true});\n$PreRegEndDate.$load({clearCache:true});\n$MaxPoints.$load({clearCache:true});\n\n// We pause a moment to allow DB retrieval time to complete\nfunction waitForIt() {\n  paws = setTimeout(go, 300);\n}\n\nfunction go() {\n\n  // Debug\n  //alert(\"Type=\" + document.getElementById('pbid-PreRegType').value,{flash:true});\n  //alert(\"Term=\" + document.getElementById('pbid-PreRegTerm').value,{flash:true});\n  //alert(\"EndDate=\" + document.getElementById('pbid-PreRegEndDate').value,{flash:true});\n  //alert(\"MaxPoints=\" + document.getElementById('pbid-MaxPoints').value,{flash:true});\n\n  var term = document.getElementById('pbid-PreRegTerm').value.substring(4,6);\n  var endDate = new Date(document.getElementById('pbid-PreRegEndDate').value);\n  \n  // Values in below if statement come from GTVSDAX\n\n  if (document.getElementById('pbid-PreRegTerm').value.length == 6 &&  // PreRegTerm has 6 characters\n      !isNaN(document.getElementById('pbid-PreRegTerm').value)     &&  // PreRegTerm is numeric\n      !isNaN(document.getElementById('pbid-MaxPoints').value)      &&  // MaxPoints is numeric\n      endDate >= today &&                                              // PreRegEndDate > Current Date\n      (term == '10' || term == '20' || term == '30')) {                // The term is 10, 20 or 30\n\n    // Preregistration is Open\n\n    // Determine what kind of user is signing on (Web Tailor)\n    for (i=0; i<$$user.authorities.length; i++) {\n      auth = $$user.authorities[i].objectName;\n      //alert(auth);  // Helpful Debug - Shows user's WebTailor Roles\n      if (auth.indexOf('WTAILORADMIN') > -1) {  // was GPBADMN\n        userType = \"Dev\";\n      }\n      if (auth.indexOf('REGISTRAR') > -1) {\n        userType = \"Reg\";\n      }\n      if (auth.indexOf('STUDENT') > -1) {\n        userType = \"Stu\";\n      }\n    }\n\n    if (userType == 'Reg' || userType == 'Dev') {\n\n      // Show the student lookup block\n      $BlockStuLookup.$visible = true;\n      $BlockNull02.$visible = true;\n      document.getElementById(\"pbid-UserSource\").value = 'R';  // Registrars or Dev User\n      document.getElementById('pbid-UserButton').click();\n    }\n    else if (userType == 'Stu') {\n\n      // Hide the student lookup block\n      $BlockStuLookup.$visible = false;\n      $BlockNull02.$visible = false;\n\n      // Prep data\n      document.getElementById(\"pbid-UserSource\").value = 'S';  // Student User\n      var userSource = 'S';\n      document.getElementById('pbid-UserButton').click();\n\n      // The FirstFunction gets the user's pidm\n      function firstFunction() {\n        var deferred = $.Deferred();\n        var nextStep = function() {\n          if ($UserPIDM == null) {\n            $UserPIDM.$load();\n            setTimeout(nextStep, 100); \n          }\n          else {\n            $PassPIDM = document.getElementById('pbid-UserPIDM').value;\n            deferred.resolve(i);\n          }\n        }\n        nextStep();\n        return deferred.promise();\n      }\n\n      // The SecondFunction calls the FirstFunction\n      // We do this to make JavaScript wait for completion of the $UserPIDM.$load DB call\n        function secondFunction() {\n        var promise = firstFunction();\n        promise.then(function(result) {\n          document.getElementById('pbid-PassPIDM').value = document.getElementById('pbid-UserPIDM').value;\n        });\n      }\n\n      secondFunction();\n    }\n    else {\n      document.getElementById(\"pbid-UserSource\").value = null;  // Not Allowed\n\n      // Hide the student lookup block\n      $BlockStuLookup.$visible = false;\n      $BlockNull02.$visible = false;\n\n      alert(\"You're not authorized to use the Drop/Add application.\",{type:\"error\"});\n    }\n  }\n  else {\n\n    // Preregistration is Closed\n\n    // Show the Closed message\n    document.getElementById('pbid-PreRegClosed').style.display = 'block';\n\n    // Hide Preregistration Instruction Objects\n    document.getElementById(\"pbid-PreRegButton\").style.display = \"none\";\n    document.getElementById(\"pbid-PreRegInfo\").style.display = \"none\";\n    document.getElementById(\"pbid-PreRegInstructions\").style.display = \"none\";\n\n    // Hide All Blocks\n    $BlockNull01.$visible = false;\n    $BlockStuLookup.$visible = false;\n    $BlockNull02.$visible = false;\n    $BlockAddClasses.$visible = false;\n    $BlockNull03.$visible = false;\n    $BlockStuCourses.$visible = false;\n    $BlockNull04.$visible = false;\n    $BlockClassSearch.$visible = false;\n    $BlockNull05.$visible = false;\n    $BlockCourseAdd.$visible = false;\n\n  }\n} // function go\n\nwaitForIt();"
+                              "onLoad": "// UserID - onLoad\n\nvar userType = '';\nvar auth = '';\nvar today = new Date();\nvar endDate;\n\n// Internet Explorer 6-11\nvar isIE = /*@cc_on!@*/false || !!document.documentMode;\n\n// IE Browser Test\nif (isIE) {\n  alert(\"This applicaiton does not support Internet Explorer.  Please choose a different browser.\",{flash:true});\n  return;\n}\n\n// Initially, hide the PreRegInstructions and show the BlockPreRegInstructions\ndocument.getElementById(\"pbid-PreRegInstructions\").style.display = \"none\";\n$BlockPreRegInstructions.$visible = true;\n$BlockNull01.$visible = true;\n\n// Initially, hide the PreRegClosed Literal\ndocument.getElementById('pbid-PreRegClosed').style.display = 'none';\n\n// Get the Preregistration Term variables (GTVSDAX)\n$PreRegType.$load({clearCache:true});\n$PreRegTerm.$load({clearCache:true});\n$PreRegEndDate.$load({clearCache:true});\n$MaxPoints.$load({clearCache:true});\n\nwaitForTermVars();\n\nfunction waitForTermVars() {\n\n  // The waitForTermVars function calls the areTermVarsLoaded function\n  // We do this to make JavaScript waits for the completion of the DB $load calls\n\n  var promise = areTermVarsLoaded();\n  promise.then(function(result) {\n\n    // Promise fulfilled.  Database Term variables have completed their load.\n    \n    // Debug\n    //alert(\"Type=\" + document.getElementById('pbid-PreRegType').value,{flash:true});\n    //alert(\"Term=\" + document.getElementById('pbid-PreRegTerm').value,{flash:true});\n    //alert(\"EndDate=\" + document.getElementById('pbid-PreRegEndDate').value,{flash:true});\n    //alert(\"MaxPoints=\" + document.getElementById('pbid-MaxPoints').value,{flash:true});\n\n    var term = document.getElementById('pbid-PreRegTerm').value.substring(4,6);\n    var endDate = new Date(document.getElementById('pbid-PreRegEndDate').value);\n\n    if (document.getElementById('pbid-PreRegTerm').value.length == 6 &&  // PreRegTerm has 6 characters\n        !isNaN(document.getElementById('pbid-PreRegTerm').value)     &&  // PreRegTerm is numeric\n        !isNaN(document.getElementById('pbid-MaxPoints').value)      &&  // MaxPoints is numeric\n        document.getElementById('pbid-MaxPoints').value.length > 0   &&  // MaxPoints length > 0\n        endDate >= today &&                                              // PreRegEndDate > Current Date\n        (term == '10' || term == '20' || term == '30')) {                // The term is 10, 20 or 30\n\n      // Preregistration is Open\n\n      // Determine what kind of user is signing on (Web Tailor)\n      for (i=0; i<$$user.authorities.length; i++) {\n        auth = $$user.authorities[i].objectName;\n        //alert(auth,{flash:true});  // Helpful Debug - Shows user's WebTailor Roles\n        if (auth.indexOf('WTAILORADMIN') > -1) {  // was GPBADMN\n          userType = \"Dev\";\n        }\n        if (auth.indexOf('REGISTRAR') > -1) {\n          userType = \"Reg\";\n        }\n        if (auth.indexOf('STUDENT') > -1) {\n          userType = \"Stu\";\n        }\n      }\n\n      if (userType == 'Reg' || userType == 'Dev') {\n\n        // Show the student lookup block\n        $BlockStuLookup.$visible = true;\n        $BlockNull02.$visible = true;\n        document.getElementById(\"pbid-UserSource\").value = 'R';  // Registrars or Dev User\n        document.getElementById('pbid-UserButton').click();\n      }\n      else if (userType == 'Stu') {\n\n        // Hide the student lookup block\n        $BlockStuLookup.$visible = false;\n        $BlockNull02.$visible = false;\n\n        // Show the Preregistration Passcode block\n        $StuPreRegPasscodeBlock.$visible = true;\n        $BlockNull03.$visible = true;\n\n        // Prep data\n        document.getElementById(\"pbid-UserSource\").value = 'S';  // Student User\n        var userSource = 'S';\n        document.getElementById('pbid-UserButton').click();\n\n        // Load the student user PIDM\n        $UserPIDM.$load();\n\n        waitForUserPidmVar();\n\n      }\n      else {\n        document.getElementById(\"pbid-UserSource\").value = null;  // User Not Allowed\n\n        // Hide the student lookup block\n        $BlockStuLookup.$visible = false;\n        $BlockNull02.$visible = false;\n\n        alert(\"You're not authorized to use the Preregistration application.\",{type:\"error\"});\n      }\n\n    }\n    else {\n\n      // Preregistration is Closed\n\n      // Show the Closed message\n      document.getElementById('pbid-PreRegClosed').style.display = 'block';\n\n      // Hide Preregistration Instruction Objects\n      document.getElementById(\"pbid-PreRegButton\").style.display = \"none\";\n      document.getElementById(\"pbid-PreRegInfo\").style.display = \"none\";\n      document.getElementById(\"pbid-PreRegInstructions\").style.display = \"none\";\n\n      // Hide All Blocks\n      $BlockStuLookup.$visible = false;\n      $BlockNull02.$visible = false;\n      $StuPreRegPasscodeBlock = false;\n      $BlockNull03.$visible = false;\n      $BlockAddClasses.$visible = false;\n      $BlockNull04.$visible = false;\n      $BlockStuCourses.$visible = false;\n      $BlockNull05.$visible = false;\n      $BlockClassSearch.$visible = false;\n      $BlockNull06.$visible = false;\n      $BlockCourseAdd.$visible = false;\n    }\n\n  });\n\n}  // function waitForTermVars()\n\nfunction areTermVarsLoaded() {  // See if term variables are loaded\n  var deferred1 = $.Deferred();\n  var nextStep1 = function() {\n    if ($PreRegType == null || $PreRegTerm == null || $PreRegEndDate == null || $MaxPoints == null) {\n      // Term variables have not loaded yet, wait a little more.\n      setTimeout(nextStep1, 100); \n    }\n    else {\n      // Term variables have loaded\n      deferred1.resolve(\"Term Variables Loaded\");\n    }\n  }\n  nextStep1();\n  return deferred1.promise();\n}\n\nfunction waitForUserPidmVar() {\n\n  // The waitForUserPidmVar function calls the isUserPidmVarLoaded function\n  // We do this to make JavaScript waits for the completion of the DB calls ($load)\n\n  var promise = isUserPidmVarLoaded();\n  promise.then(function(result) {\n    // Promise fulfilled.  Database UserPIDM variable has completed its load.\n    document.getElementById('pbid-PassPIDM').value = document.getElementById('pbid-UserPIDM').value;\n  });\n}\n\nfunction isUserPidmVarLoaded() {  // See if the UserPIDM variable is loaded\n  var deferred2 = $.Deferred();\n  var nextStep2 = function() {\n    if ($UserPIDM == null) {\n      // UserPIDM variable is not loaded yet, wait a little more.\n      setTimeout(nextStep2, 100); \n    }\n    else {\n      // UserPIDM has loaded\n      $PassPIDM = document.getElementById('pbid-UserPIDM').value;\n      deferred2.resolve(\"UserPIDM Loaded\");\n    }\n  }\n  nextStep2();\n  return deferred2.promise();\n}"
                         },
                         {
                               "name": "UserPIDM",
@@ -202,17 +226,73 @@
                               "onUpdate": ""
                         },
                         {
-                              "name": "Messages",
+                              "name": "AddCourseEdits",
                               "type": "text",
-                              "model": "getMessages.MESSAGE",
+                              "model": "getEdits.EDIT_MSG",
                               "parameters": {
-                                    "stu_pidm": "$PassPIDM"
+                                    "stu_pidm": "$PassPIDM",
+                                    "term_code": "$PreRegTerm",
+                                    "crn": "$ClassCRN"
+                              },
+                              "loadInitially": false,
+                              "onLoad": "",
+                              "required": false,
+                              "value": "",
+                              "validation": {},
+                              "readonly": false
+                        },
+                        {
+                              "name": "StudentPIN",
+                              "type": "text",
+                              "model": "getStuPIN.STU_PIN",
+                              "parameters": {
+                                    "stu_pidm": "$PassPIDM",
+                                    "term_code": "$PreRegTerm"
                               },
                               "validation": {},
                               "readonly": false,
                               "required": false,
-                              "loadInitially": true,
-                              "onLoad": "// Messages - onLoad\n\nif ($Message != null) {\n  alert($Messages,{type:\"error\"});\n}"
+                              "loadInitially": false,
+                              "onLoad": ""
+                        },
+                        {
+                              "name": "InstructorPIN",
+                              "type": "text",
+                              "model": "getInstrPIN.INSTR_PIN",
+                              "parameters": {
+                                    "crn": "$ClassCRN",
+                                    "term_code": "$PreRegTerm"
+                              },
+                              "validation": {},
+                              "readonly": false,
+                              "required": false,
+                              "loadInitially": false
+                        },
+                        {
+                              "name": "DepartmentPIN",
+                              "type": "text",
+                              "parameters": {
+                                    "crn": "$ClassCRN",
+                                    "term_code": "$PreRegTerm"
+                              },
+                              "validation": {},
+                              "readonly": false,
+                              "required": false,
+                              "loadInitially": false,
+                              "model": "getDeptPIN.DEPT_PIN"
+                        },
+                        {
+                              "name": "ConsentRequired",
+                              "type": "text",
+                              "model": "getConsentRequired.CONSENT_REQUIRED",
+                              "parameters": {
+                                    "crn": "$ClassCRN",
+                                    "term_code": "$PreRegTerm"
+                              },
+                              "validation": {},
+                              "readonly": false,
+                              "required": false,
+                              "loadInitially": false
                         }
                   ]
             },
@@ -234,7 +314,8 @@
                                           "name": "PreRegButton",
                                           "type": "button",
                                           "label": "Preregistration Instructions",
-                                          "onClick": "// Show/Hide the Preregistration instructions\n\nif (document.getElementById(\"pbid-PreRegInstructions\").style.display == 'none') {\n  document.getElementById(\"pbid-PreRegInstructions\").style.display = \"block\";\n}\nelse {\n  document.getElementById(\"pbid-PreRegInstructions\").style.display = \"none\";\n}"
+                                          "onClick": "// Show/Hide the Preregistration instructions\n\nif (document.getElementById(\"pbid-PreRegInstructions\").style.display == 'none') {\n  document.getElementById(\"pbid-PreRegInstructions\").style.display = \"block\";\n}\nelse {\n  document.getElementById(\"pbid-PreRegInstructions\").style.display = \"none\";\n}",
+                                          "valueStyle": "btn btn-sm"
                                     },
                                     {
                                           "name": "PreRegInfo",
@@ -314,7 +395,8 @@
                                           "type": "button",
                                           "label": "Search",
                                           "style": "flex",
-                                          "onClick": "var stuLkup = document.StuLookupForm.StuLookup.value;\n\nif (stuLkup.replace(/^\\s+/g, '').length == 0) {\n  document.StuLookupForm.StuLookup.focus();\n  alert(\"Student Lookup is empty.\", {flash: true,type:\"error\"});\n  return;\n}\n\ndocument.getElementById('pbid-StuSelect').options[0].text = 'Loading...';\n\n$StuSelect.$populateSource();"
+                                          "onClick": "var stuLkup = document.StuLookupForm.StuLookup.value;\n\nif (stuLkup.replace(/^\\s+/g, '').length == 0) {\n  document.StuLookupForm.StuLookup.focus();\n  alert(\"Student Lookup is empty.\", {flash: true,type:\"error\"});\n  return;\n}\n\ndocument.getElementById('pbid-StuSelect').options[0].text = 'Loading...';\n\n$StuSelect.$populateSource();",
+                                          "valueStyle": "btn btn-sm"
                                     },
                                     {
                                           "name": "StuSelect",
@@ -333,7 +415,7 @@
                                           "onLoad": "document.getElementById('pbid-StuSearch').click();\n\nif (document.getElementById('pbid-StuSelect').options.length > 1) {\n  document.getElementById('pbid-StuSelect').options[0].text = 'Select a Student';\n}\nelse {\n  document.getElementById('pbid-StuSelect').options[0].text = 'No Students Found';\n}",
                                           "onError": "",
                                           "value": "",
-                                          "onUpdate": "// StuSelect - onUpdate\n\n// Selected student is changing\n\n// Assign chosen student's values\nvar stuSelect = $StuSelect.$selected?$StuSelect.$selected. STU_PIDM:null;\n$PassPIDM = $StuSelect.$selected?$StuSelect.$selected. STU_PIDM:null;\nvar userSource = document.getElementById('pbid-UserSource').value;\n\nif (stuSelect != null) {\n  $AddEntryStuName.$load({clearCache:true});\n  $AddEntryStuClass.$load({clearCache:true});\n  $CoursesTable.$load({clearCache:true});\n  $BlockNull04.$visible = false;\n  $BlockClassSearch.$visible = false;\n  $BlockNull05.$visible = false;\n  $BlockCourseAdd.$visible = false;\n}\nelse {\n  // Hide all Blocks\n  $BlockNull02.$visible = false;\n  $BlockAddClasses.$visible = false;\n  $BlockNull03.$visible = false;\n  $BlockStuCourses.$visible = false;\n}",
+                                          "onUpdate": "// StuSelect - onUpdate\n\n// Selected student is changing\n\n// Assign chosen student's values\nvar stuSelect = $StuSelect.$selected?$StuSelect.$selected. STU_PIDM:null;\n$PassPIDM = $StuSelect.$selected?$StuSelect.$selected. STU_PIDM:null;\nvar userSource = document.getElementById('pbid-UserSource').value;\n\nif (stuSelect != null) {\n  $AddEntryStuName.$load({clearCache:true});\n  $AddEntryStuClass.$load({clearCache:true});\n  $CoursesTable.$load({clearCache:true});\n  $BlockClassSearch.$visible = false;\n  $BlockNull06.$visible = false;\n  $BlockCourseAdd.$visible = false;\n}\nelse {\n  // Hide all Blocks\n  $BlockAddClasses.$visible = false;\n  $BlockNull04.$visible = false;\n  $BlockStuCourses.$visible = false;\n  $BlockNull05.$visible = false;\n  $BlockClassSearch.$visible = false;\n  $BlockNull06.$visible = false;\n  $BlockCourseAdd.$visible = false;\n}",
                                           "label": ""
                                     }
                               ]
@@ -348,6 +430,75 @@
                   "components": [
                         {
                               "name": "BlockSpace02",
+                              "type": "literal",
+                              "value": "&nbsp;"
+                        }
+                  ]
+            },
+            {
+                  "name": "StuPreRegPasscodeBlock",
+                  "type": "block",
+                  "style": "blocks",
+                  "showInitially": false,
+                  "components": [
+                        {
+                              "name": "StuPreRegPasscodeLabel",
+                              "type": "literal",
+                              "value": "Preregistration Passcode Verification"
+                        },
+                        {
+                              "name": "StuPreRegPasscodeForm",
+                              "type": "form",
+                              "style": "blocks",
+                              "nextButtonLabel": "Next",
+                              "showInitially": true,
+                              "components": [
+                                    {
+                                          "name": "StuPreRegPasscodeInstructions",
+                                          "type": "literal",
+                                          "value": "Please enter your Preregistration Passcode.<br/><br/>"
+                                    },
+                                    {
+                                          "name": "StuPreRegPasscodeInputBlock",
+                                          "type": "block",
+                                          "style": "blockAddEntry",
+                                          "showInitially": true,
+                                          "components": [
+                                                {
+                                                      "name": "StuPreRegPasscode",
+                                                      "type": "text",
+                                                      "label": "Preregistration Passcode:",
+                                                      "style": "blockInline",
+                                                      "parameters": {},
+                                                      "validation": {},
+                                                      "readonly": false,
+                                                      "required": false,
+                                                      "loadInitially": true
+                                                },
+                                                {
+                                                      "name": "StuPreRegPasscodeButton",
+                                                      "type": "button",
+                                                      "label": "Submit",
+                                                      "onClick": "// StuPreRegPasscodeButton - onClick\n\nvar paws;\n\n// Passcode database edits\n$PreRegTerm = document.getElementById('pbid-PreRegTerm').value;\n$StudentPIN.$load({clearCache:true});\n\nwaitForStudentPIN();\n\n\nfunction waitForStudentPIN() {\n\n  // The waitForStudentPIN function calls the isStudentPINLoaded function\n  // We do this to make JavaScript wait for the completion of the DB calls ($load)\n\n  var promise = isStudentPINLoaded();\n  promise.then(function(result) {\n    \n    // Promise fulfilled.  Database myVariable has completed its load.\n    \n    // Debug\n    //alert(\"StudentPIN=\" + document.getElementById('pbid-StudentPIN').value,{flash:true});\n\n    // Instructor Consent edit\n    if (document.getElementById('pbid-StudentPIN').value > '') {\n      if (document.getElementById('pbid-StuPreRegPasscode').value == '') {\n        alert(\"A Preregistration Passcode is required.\",{flash: true,type:\"error\"});\n        return;\n      }\n      if (document.getElementById('pbid-StuPreRegPasscode').value != document.getElementById('pbid-StudentPIN').value) {\n        alert(\"The Preregistration Passcode you entered was not correct.\",{flash: true,type:\"error\"});\n        return;\n      }\n    }\n\n    // The preregistration password was correct.\n\n    // Hide the Student Preregistration Passcode block\n    $StuPreRegPasscodeBlock.$visible = false;\n    $BlockNull03.$visible = false;\n\n    // Load the goods\n    $AddEntryStuName.$load({clearCache:true});\n    $AddEntryStuClass.$load({clearCache:true});\n    $CoursesTable.$load({clearCache:true});\n\n    // Show these Blocks\n    $BlockAddClasses.$visible = true;\n    $BlockNull04.$visible = true;\n    $BlockStuCourses.$visible = true;\n    $BlockNull05.$visible = true;\n  });\n}\n\nfunction isStudentPINLoaded() {  // See if the StudentPIN is loaded\n  var deferred = $.Deferred();\n  var nextStep = function() {\n    if ($StudentPIN == null) {\n      // StudentPIN is not loaded yet, wait a little more.\n      setTimeout(nextStep, 100); \n    }\n    else {\n      // StudentPIN has loaded\n      deferred.resolve(\"StudentPIN Loaded\");\n    }\n  }\n  nextStep();\n  return deferred.promise();\n}",
+                                                      "valueStyle": "btn btn-sm"
+                                                }
+                                          ]
+                                    }
+                              ],
+                              "label": "",
+                              "submitLabel": ""
+                        }
+                  ]
+            },
+            {
+                  "name": "BlockNull03",
+                  "type": "block",
+                  "label": "",
+                  "style": "blockSpace",
+                  "showInitially": false,
+                  "components": [
+                        {
+                              "name": "BlockSpace03",
                               "type": "literal",
                               "value": "&nbsp;"
                         }
@@ -454,26 +605,28 @@
                                           "name": "SearchClassSchedule",
                                           "type": "button",
                                           "label": "Search Class Schedule",
-                                          "onClick": "// Show/Hide the Class Schedule search section\n\nif ($BlockClassSearch.$visible == false) {\n  $BlockNull04.$visible = true;\n  $BlockClassSearch.$visible = true;\n  $BlockNull05.$visible = true;\n  $BlockCourseAdd.$visible = true;\n  $SearchTermSelect.$load({clearCache:true});\n  $SearchSubjectSelect.$load({clearCache:true});\n  $SearchBlockSelect.$load({clearCache:true});\n  $SearchInstructorSelect.$load({clearCache:true});\n  $SearchDegReqSelect.$load({clearCache:true});\n  $SearchCampusSelect.$load({clearCache:true});\n  alert(\"Class Schedule form displayed below.\", {flash: true});\n}\nelse {\n  $BlockClassSearch.$visible = false;\n  $BlockNull05.$visible = false;\n  $BlockCourseAdd.$visible = false;\n}"
+                                          "onClick": "// SearchClassSchedule - onClick\n\n// Show/Hide the Class Schedule search section\n\nif ($BlockClassSearch.$visible == false) {\n  $BlockClassSearch.$visible = true;\n  $BlockNull06.$visible = true;\n  $BlockCourseAdd.$visible = true;\n  $SearchTermSelect.$load({clearCache:true});\n  $SearchSubjectSelect.$load({clearCache:true});\n  $SearchBlockSelect.$load({clearCache:true});\n  $SearchInstructorSelect.$load({clearCache:true});\n  $SearchDegReqSelect.$load({clearCache:true});\n  $SearchCampusSelect.$load({clearCache:true});\n  alert(\"Class Schedule form displayed below.\", {flash: true});\n}\nelse {\n  $BlockClassSearch.$visible = false;\n  $BlockNull06.$visible = false;\n  $BlockCourseAdd.$visible = false;\n}",
+                                          "valueStyle": "btn btn-sm"
                                     },
                                     {
                                           "name": "AddCourseButton",
                                           "type": "button",
                                           "label": "Add Course",
-                                          "onClick": "// AddCourseButton - onClick\n\nvar paws;\n\n// Retrieve input values from the Class form\nvar crn = document.getElementById('pbid-ClassCRN').value;\n\n// Remove the value \"string:\" which was prefixed via the Class Schedule Search process\nvar crn = crn.substring(crn.indexOf(\":\")+1,crn.length);\n\n// CRN maximum value edit\nif (crn.length > 5) {\n  alert(\"CRN value is greater than 5 digits.\",{flash: true,type:\"error\"});\n  return;\n}\n\n// Make the ClassCRN field read-only during this transaction session\ndocument.getElementById('pbid-ClassCRN').readOnly = true;\n\n// Procedure call - Add Check - This checks the course being added\n$addClass.$post({  // ---------- addClass Post\n  stu_pidm: $PassPIDM,\n  term_code: document.getElementById('pbid-PreRegTerm').value,\n  crn: crn\n},\nnull,\nfunction(response) {  // ---------- addClass Success\n  // Success!\n\n  // Get add course messages\n  $Messages.$load({clearCache:true});\n\n  // Wait for Messages to load\n  waitForIt();\n},\nfunction(response) {  // ---------- addClass Error\n  var errorMessage = response.data.errors?response.data.errors.errorMessage:null;\n\n  if (response.data.errors.errorMessage) {\n    errorMsg = response.data.errors.errorMessage;\n  }\n  else if (response.data.errors[0].errorMessage) {\n    errorMsg = response.data.errors[0].errorMessage;\n  } \n  else {\n    errorMsg = errorMessage?errorMessage:response.data;\n  }\n  if (errorMsg) {\n    alert(\"addClass Error: \" + errorMsg,{type:\"error\"});  // Display Error\n    return;\n  }\n\n});  // ---------- addClass Close\n\n// Allow time for the $Messages database call to finish\nfunction waitForIt() {\n  paws = setTimeout(go, 100);\n}\n\n// Go\nfunction go() {\n\n  // Display Messages\n  if (document.getElementById('pbid-Messages').value) {\n    alert(document.getElementById('pbid-Messages').value,{type:\"error\"});\n  }\n\n  // Make the ClassCRN field accessible\n  document.getElementById('pbid-ClassCRN').readOnly = false;\n\n  // Reset the CRN input\n  document.getElementById('pbid-ClassCRN').value = '';\n\n  // Reload the CoursesTable from the database\n  $CoursesTable.$load({clearCache:true});\n\n  alert(\"Preregistration Course Added\",{flash:true});\n}"
+                                          "onClick": "// AddCourseButton - onClick\n\n// Retrieve input values from the Class form\nvar crn = document.getElementById('pbid-ClassCRN').value;\n\n// Remove the value \"string:\" which was prefixed via the Class Schedule Search process\nvar crn = crn.substring(crn.indexOf(\":\")+1,crn.length);\n\n// CRN edits\n\n// CRN null edit\nif (crn.length == 0) {\n  alert(\"CRN required.\",{flash: true,type:\"error\"});\n  document.getElementById('pbid-ClassCRN').focus();\n  return;\n}\n\n// CRN numeric edit\nif (isNaN(crn)) {\n  alert(\"CRN is not numeric.\",{flash: true,type:\"error\"});\n  document.getElementById('pbid-ClassCRN').focus();\n  return;\n}\n\n// CRN maximum length value edit\nif (crn.length > 5) {\n  alert(\"CRN value is greater than 5 digits.\",{flash: true,type:\"error\"});\n  document.getElementById('pbid-ClassCRN').focus();\n  return;\n}\n\n// CRN minimum length value edit\nif (crn.length < 5) {\n  alert(\"CRN value is less than 5 digits.\",{flash: true,type:\"error\"});\n  document.getElementById('pbid-ClassCRN').focus();\n  return;\n}\n\n// CRN not within current term\nif (crn.substring(0,2) != document.getElementById('pbid-PreRegTerm').value.substring(4,6)) {\n  alert(\"Invalid CRN for preregistration term.\",{flash: true,type:\"error\"});\n  document.getElementById('pbid-ClassCRN').focus();\n  return;\n}\n\n// CRN database edits\n$PreRegTerm = document.getElementById('pbid-PreRegTerm').value;\ndocument.getElementById('pbid-AddCourseEdits').value = '';\n$AddCourseEdits = '';\n$AddCourseEdits.$load({clearCache:true});\n\nwaitForAddCourseEdits();\n\n\nfunction waitForAddCourseEdits() {\n\n  // The waitForAddCourseEdits function calls the areAddCourseEditsLoaded function\n  // We do this to make JavaScript waits for the completion of the DB calls ($load)\n\n  var promise = areAddCourseEditsLoaded();\n  promise.then(function(result) {\n\n    // Promise fulfilled.  Database AddCourseEdits variable has completed its load.\n    \n    // Debug\n    //alert(\"AddCourseEdits=\" + document.getElementById('pbid-AddCourseEdits').value,{flash:true});\n\n    // Invalid CRN edit\n    if (document.getElementById('pbid-AddCourseEdits').value == '0') {\n      document.getElementById('pbid-AddCourseEdits').value = 'Invalid CRN';\n    }\n\n    // No errors edit\n    if (document.getElementById('pbid-AddCourseEdits').value == '1') {\n      document.getElementById('pbid-AddCourseEdits').value = '';\n    }\n\n    // Display any CRN edit messages\n    if (document.getElementById('pbid-AddCourseEdits').value > '') {\n      alert(document.getElementById('pbid-AddCourseEdits').value,{flash: true,type:\"error\"});\n      document.getElementById('pbid-ClassCRN').focus();\n      return;\n    }\n\n    // Load consent PINs\n    $ConsentRequired.$load({clearCache:true});\n    $InstructorPIN.$load({clearCache:true});\n    $DepartmentPIN.$load({clearCache:true});\n\n    waitForPinsLoads();\n\n  });\n}\n\nfunction areAddCourseEditsLoaded() {  // See if the AddCourseEdits variable is loaded\n  var deferred = $.Deferred();\n  var nextStep = function() {\n    if ($AddCourseEdits == '') {\n      // AddCourseEdits are not loaded yet, wait a little more.\n      setTimeout(nextStep, 100); \n    }\n    else {\n      // AddCourseEdits have loaded\n      deferred.resolve(\"AddCourseEdits Loaded\");\n    }\n  }\n  nextStep();\n  return deferred.promise();\n}\n\nfunction waitForPinsLoads() {\n\n  // The waitForPinsLoads function calls the arePinsLoaded function\n  // We do this to make JavaScript waits for the completion of the DB calls ($load)\n\n  var promise = arePinsLoaded();\n  promise.then(function(result) {\n\n    // Promise fulfilled.  Database PIN variables have completed their loads.\n\n    if (document.getElementById('pbid-ConsentRequired').value == 'D') {\n    \n      // Department consent is required\n\n      if (document.getElementById('pbid-DepartmentPIN').value == '') {\n        alert(\"Department consent is required for this CRN, but this subject has no passcode. Please contact the Registrar.\",{flash: true,type:\"error\"});\n        return;\n      }\n      if (document.getElementById('pbid-ClassConsent').value == '') {\n        alert(\"Department consent is required for this CRN. Please enter the Consent Passcode.\",{flash: true,type:\"error\"});\n        return;\n      }\n      if (document.getElementById('pbid-ClassConsent').value != document.getElementById('pbid-DepartmentPIN').value) {\n        alert(\"Department consent is required for this CRN and the Consent Passcode you entered is not the right one.\",{flash: true,type:\"error\"});\n        return;\n      }\n    }\n\n    if (document.getElementById('pbid-ConsentRequired').value == 'I') {\n    \n      // Instructor consent is required\n\n      if (document.getElementById('pbid-InstructorPIN').value == '') {\n        alert(\"Instructor consent is required for this CRN, but this instructor has no passcode. Please contact the Registrar.\",{flash: true,type:\"error\"});\n        return;\n      }\n      if (document.getElementById('pbid-ClassConsent').value == '') {\n        alert(\"Instructor consent is required for this CRN. Please enter the Consent Passcode.\",{flash: true,type:\"error\"});\n        return;\n      }\n      if (document.getElementById('pbid-ClassConsent').value != document.getElementById('pbid-InstructorPIN').value) {\n        alert(\"Instructor consent is required for this CRN and the Consent Passcode you entered is not the right one.\",{flash: true,type:\"error\"});\n        return;\n      }\n    }\n\n    // All edits have passed. Add the preregistration course.\n\n    // Procedure call - Add Check - This checks the course being added\n    $addClass.$post({  // ---------- addClass Post\n      stu_pidm: $PassPIDM,\n      term_code: document.getElementById('pbid-PreRegTerm').value,\n      crn: crn\n    },\n    null,\n    function(response) {  // ---------- addClass Success\n\n      // Success!\n\n      // Reset the CRN input\n      document.getElementById('pbid-ClassCRN').value = '';\n      document.getElementById('pbid-ClassConsent').value = '';\n\n      // Reload the CoursesTable from the database\n      $CoursesTable.$load({clearCache:true});\n\n      alert(\"Preregistration Course Added\",{flash:true});\n    },\n    function(response) {  // ---------- addClass Error\n      var errorMessage = response.data.errors?response.data.errors.errorMessage:null;\n\n      if (response.data.errors.errorMessage) {\n        errorMsg = response.data.errors.errorMessage;\n      }\n      else if (response.data.errors[0].errorMessage) {\n        errorMsg = response.data.errors[0].errorMessage;\n      } \n      else {\n        errorMsg = errorMessage?errorMessage:response.data;\n      }\n      if (errorMsg) {\n        alert(\"addClass Error: \" + errorMsg,{type:\"error\"});  // Display Error\n        return;\n      }\n    });  // ---------- addClass Close\n\n  });  // promise.then Close\n\n}      // waitForPinsLoads() Close\n\nfunction arePinsLoaded() {  // See if the PIN variables are loaded\n  var deferred2 = $.Deferred();\n  var nextStep2 = function() {\n    if ($ConsentRequired == null || $InstructorPIN == null || $DepartmentPIN == null) {\n      // PIN variables are not loaded yet, wait a little more.\n      setTimeout(nextStep2, 100); \n    }\n    else {\n      // PIN variables have loaded\n      deferred2.resolve(\"PIN Variables Loaded\");\n    }\n  }\n  nextStep2();\n  return deferred2.promise();\n}",
+                                          "valueStyle": "btn btn-sm"
                                     }
                               ]
                         }
                   ]
             },
             {
-                  "name": "BlockNull03",
+                  "name": "BlockNull04",
                   "type": "block",
                   "style": "blockSpace",
                   "showInitially": false,
                   "components": [
                         {
-                              "name": "BlockSpace03",
+                              "name": "BlockSpace04",
                               "type": "literal",
                               "value": "&nbsp;"
                         }
@@ -614,7 +767,7 @@
                                           "loadInitially": false
                                     }
                               ],
-                              "onLoad": "// CoursesTable - onLoad\n\nvar rows = $CoursesTable.$data.length;\nvar row = 0;\nvar paws;\nvar j = 0;\nvar k = 0;\nvar points = 0;\n\n// Populate Track select labels and values\n$Track.$load();\n\nwaitForIt();\n\n// Allow time for the database call to finish\nfunction waitForIt() {\n  paws = setTimeout(go, 200);\n}\n\n// Go\nfunction go() {\n  for (row=0; row<rows; row++) {\n\n    // Remove readonly attribute on Points input text objects\n    document.getElementById('pbid-Points-' + row).removeAttribute('readonly');\n\n    // Total the points for the Total Points line\n    points = points + parseInt(document.getElementById('pbid-Points-' + row).value);\n\n    // Convert null to zero\n    if (document.getElementById('pbid-Points-' + row).value == '') {\n      document.getElementById('pbid-Points-' + row).value = 0;\n    }\n  }\n\n  // Set Styling of Points Total Line\n  j = row - 1;\n  document.getElementById('pbid-Track-' + j).style.display = 'none';\n  document.getElementById('pbid-CoursesTabledelete-column-checkbox-' + j).style.display = 'none';\n  document.getElementById('pbid-Block-' + j).style.fontWeight = 'bold';  // \"Total\" text\n  document.getElementById('pbid-Block-' + j).style.fontSize = '115%';\n  document.getElementById('pbid-Points-' + j).readOnly = true;  // Points Total Styling\n  document.getElementById('pbid-Points-' + j).style.border = '0px';\n  document.getElementById('pbid-Points-' + j).style.boxShadow = 'inset 4px 4px 4px #FFFFFF';\n  document.getElementById('pbid-Points-' + j).style.fontWeight = 'bold';\n  document.getElementById('pbid-Points-' + j).style.fontSize = '115%';\n  document.getElementById('pbid-Points-' + j).style.paddingBottom = '14px';\n  document.getElementById('pbid-Points-' + j).style.paddingRight = '21px';\n\n  // Save the Total Points Index\n  document.getElementById('pbid-TotalPointsIndex').value = j;\n\n  // Show the Add Classes Block\n  $BlockNull02.$visible = true;\n  $BlockAddClasses.$visible = true;\n\n  // Show or Hide the Student Courses Block\n  if (j > 0) {\n    $BlockNull03.$visible = true;\n    $BlockStuCourses.$visible = true;\n  }\n  else {\n    $BlockNull03.$visible = false;\n    $BlockStuCourses.$visible = false;\n    alert(\"No preregistration records found.\",{flash:true});\n  }\n\n  document.getElementById('pbid-UserButton').click();\n\n  loopForever();\n}\n\nfunction loopForever() {\n  paws = setTimeout(getRowCount, 250);\n}\n\nfunction getRowCount() {\n\n  // This function checks to see if a row from the $CoursesTable has been deleted.\n  // If a row has been deleted, then update the Total Points value.\n\n  if (document.getElementById('pbid-TotalPointsIndex').value != $CoursesTable.$data.length - 1) {\n\n    // Retotal the total point values\n    rows = $CoursesTable.$data.length;\n    row = 0;\n    points = 0;\n    for (row=0; row<rows-1; row++) {\n      if (document.getElementById('pbid-Points-' + row).value == '') {\n        // Convert null to zero\n        document.getElementById('pbid-Points-' + row).value = 0;\n      }\n      points = points + parseInt(document.getElementById('pbid-Points-' + row).value);\n    }\n\n    // Save the Total Points Index\n    j = $CoursesTable.$data.length - 1;\n    document.getElementById('pbid-TotalPointsIndex').value = j;\n\n    // Update Total Points\n    document.getElementById('pbid-Points-' + j).value = points;\n  }\n\n  loopForever();\n}",
+                              "onLoad": "// CoursesTable - onLoad\n\nvar rows = $CoursesTable.$data.length;\nvar row = 0;\nvar paws;\nvar j = 0;\nvar k = 0;\nvar points = 0;\n\n// Populate Track select labels and values\n$Track.$load();\n\nwaitForIt();\n\n// Allow time for the database call to finish\nfunction waitForIt() {\n  paws = setTimeout(go, 300);\n}\n\n// Go\nfunction go() {\n  for (row=0; row<rows; row++) {\n\n    // Remove readonly attribute on Points input text objects\n    document.getElementById('pbid-Points-' + row).removeAttribute('readonly');\n\n    // Total the points for the Total Points line\n    points = points + parseInt(document.getElementById('pbid-Points-' + row).value);\n\n    // Convert null to zero\n    if (document.getElementById('pbid-Points-' + row).value == '') {\n      document.getElementById('pbid-Points-' + row).value = 0;\n    }\n  }\n\n  // Set Styling of Points Total Line\n  j = row - 1;\n  document.getElementById('pbid-Track-' + j).style.display = 'none';\n  document.getElementById('pbid-CoursesTabledelete-column-checkbox-' + j).style.display = 'none';\n  document.getElementById('pbid-Block-' + j).style.fontWeight = 'bold';  // \"Total\" text\n  document.getElementById('pbid-Block-' + j).style.fontSize = '115%';\n  document.getElementById('pbid-Points-' + j).readOnly = true;  // Points Total Styling\n  document.getElementById('pbid-Points-' + j).style.border = '0px';\n  document.getElementById('pbid-Points-' + j).style.boxShadow = 'inset 4px 4px 4px #FFFFFF';\n  document.getElementById('pbid-Points-' + j).style.fontWeight = 'bold';\n  document.getElementById('pbid-Points-' + j).style.fontSize = '115%';\n  document.getElementById('pbid-Points-' + j).style.paddingBottom = '14px';\n  document.getElementById('pbid-Points-' + j).style.paddingRight = '21px';\n\n  // Save the Total Points Index\n  document.getElementById('pbid-TotalPointsIndex').value = j;\n\n  // Show the Add Classes Block\n  $BlockAddClasses.$visible = true;\n  $BlockNull04.$visible = true;\n\n  // Show or Hide the Student Courses Block\n  if (j > 0) {\n    $BlockStuCourses.$visible = true;\n    $BlockNull05.$visible = true;\n  }\n  else {\n    $BlockStuCourses.$visible = false;\n    $BlockNull05.$visible = false;\n    alert(\"No preregistration records found.\",{flash:true});\n  }\n\n  document.getElementById('pbid-UserButton').click();\n\n  loopForever();\n}\n\nfunction loopForever() {\n  paws = setTimeout(getRowCount, 250);\n}\n\nfunction getRowCount() {\n\n  // This function checks to see if a row from the $CoursesTable has been deleted.\n  // If a row has been deleted, then update the Total Points value.\n\n  if (document.getElementById('pbid-TotalPointsIndex').value != $CoursesTable.$data.length - 1) {\n\n    // Retotal the total point values\n    rows = $CoursesTable.$data.length;\n    row = 0;\n    points = 0;\n    for (row=0; row<rows-1; row++) {\n      if (document.getElementById('pbid-Points-' + row).value == '') {\n        // Convert null to zero\n        document.getElementById('pbid-Points-' + row).value = 0;\n      }\n      points = points + parseInt(document.getElementById('pbid-Points-' + row).value);\n    }\n\n    // Save the Total Points Index\n    j = $CoursesTable.$data.length - 1;\n    document.getElementById('pbid-TotalPointsIndex').value = j;\n\n    // Update Total Points\n    document.getElementById('pbid-Points-' + j).value = points;\n  }\n\n  loopForever();\n}",
                               "onSave": "// CoursesTable - onSave\n\nvar actionAskConfirm = null;\nvar actionSave = 1;\nvar actionCancel = 2;\nvar result = true;  // Do not call default save after onSave\n\nif ($CoursesTable.myAction == actionAskConfirm ) {\n\n  // We want confirmation if save button is clicked\n  \n  alert(\"Are you sure you want to save these changes?\",\n    { prompts:\n      [\n        { label:\"OK\",\n          action:function() {\n            $CoursesTable.myAction = actionSave;\n            $CoursesTable.$save();\n          }\n        },\n        { label:\"Cancel\",\n          action:function() {\n            $CoursesTable.myAction = actionCancel;\n            $CoursesTable.$save();\n          }\n        }\n      ]\n    }\n  );\n\n}\nelse if ($CoursesTable.myAction == actionSave) {  \n  result = false;  // Call default save after onSave\n}\n \n// Reset to ask save confirmation\n$CoursesTable.myAction = actionAskConfirm;\nreturn result;",
                               "onSaveSuccess": "alert(\"Changes Applied\",{flash:true});",
                               "onError": "alert(\"Failed Save\",{type:\"error\"});",
@@ -636,7 +789,8 @@
                                           "name": "CoursesReset",
                                           "type": "button",
                                           "label": "Reset",
-                                          "onClick": "// CoursesReset - onClick\n\n// Reload the CoursesTable from the database\n$CoursesTable.$load({clearCache:true});"
+                                          "onClick": "// CoursesReset - onClick\n\n// Reload the CoursesTable from the database\n$CoursesTable.$load({clearCache:true});",
+                                          "valueStyle": "btn btn-sm"
                                     }
                               ]
                         }
@@ -644,12 +798,12 @@
                   "style": "blocks"
             },
             {
-                  "name": "BlockNull04",
+                  "name": "BlockNull05",
                   "type": "block",
                   "showInitially": false,
                   "components": [
                         {
-                              "name": "BlockSpace04",
+                              "name": "BlockSpace05",
                               "type": "literal",
                               "value": "&nbsp;"
                         }
@@ -794,12 +948,12 @@
                   ]
             },
             {
-                  "name": "BlockNull05",
+                  "name": "BlockNull06",
                   "type": "block",
                   "showInitially": false,
                   "components": [
                         {
-                              "name": "BlockSpace05",
+                              "name": "BlockSpace06",
                               "type": "literal",
                               "value": "&nbsp;"
                         }
@@ -854,7 +1008,7 @@
                                                       "booleanTrueValue": "1",
                                                       "booleanFalseValue": "0",
                                                       "readonly": false,
-                                                      "onUpdate": "// AddCourse - onUpdate\n\nvar rows = $AddGrid.$data.length;\nvar i = 0;\nvar k = 0;\n\n// Loop through all AddGrid rows\nfor (i=0; i<rows; i++) {\n\n  if (document.getElementById(\"pbid-AddCourse-\" + i).checked) {\n\n    // User checked an AddGrid's AddCourse checkbox\n\n    // Set Term within the AddEntryForm\n    /*for(k=0; k<document.getElementById('pbid-AddTermEntry').options.length; k++) {\n      if (document.getElementById('pbid-AddTermEntry').options[k].innerHTML == $AddGrid.$data[i].TERM) {\n        document.getElementById('pbid-AddTermEntry').selectedIndex = k;\n        break;\n      }\n    }*/\n\n    // Set the CRN within the AddEntryForm\n    $ClassCRN = $AddGrid.$data[i].CRN;\n\n    // Hide the Class Schedule Search and Class Schedule Search Results sections\n    $BlockNull04.$visible = false;\n    $BlockClassSearch.$visible = false;\n    $BlockCourseAdd.$visible = false;\n\n    // Reset the Class Search Results form\n    document.getElementById(\"pbid-AddCourse-\" + i).click();  // Maintain state of checkbox\n    document.getElementById(\"pbid-CourseAddForm\").reset();\n\n    break;\n  }\n}",
+                                                      "onUpdate": "// AddCourse - onUpdate\n\nvar rows = $AddGrid.$data.length;\nvar i = 0;\nvar k = 0;\n\n// Loop through all AddGrid rows\nfor (i=0; i<rows; i++) {\n\n  if (document.getElementById(\"pbid-AddCourse-\" + i).checked) {\n\n    // User checked an AddGrid's AddCourse checkbox\n\n    // Set the CRN within the AddEntryForm\n    $ClassCRN = $AddGrid.$data[i].CRN;\n\n    // Hide the Class Schedule Search and Class Schedule Search Results blocks\n    $BlockClassSearch.$visible = false;\n    $BlockNull06.$visible = false;\n    $BlockCourseAdd.$visible = false;\n\n    // Reset the Class Search Results form\n    document.getElementById(\"pbid-AddCourse-\" + i).click();  // Maintain state of checkbox\n    document.getElementById(\"pbid-CourseAddForm\").reset();\n\n    break;\n  }\n}",
                                                       "onLoad": "",
                                                       "model": ""
                                                 },
@@ -983,5 +1137,5 @@
             }
       ],
       "style": "",
-      "importCSS": "ccStyleStuPreReg"
+      "importCSS": "cc_global_css,ccStyleStuPreReg"
 }

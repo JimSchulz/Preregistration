@@ -14,7 +14,7 @@ waitForIt();
 
 // Allow time for the database call to finish
 function waitForIt() {
-  paws = setTimeout(go, 200);
+  paws = setTimeout(go, 300);
 }
 
 // Go
