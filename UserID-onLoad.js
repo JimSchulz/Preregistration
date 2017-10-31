@@ -14,10 +14,9 @@ if (isIE) {
   return;
 }
 
-// Initially, hide the PreRegInstructions and show the BlockPreRegInstructions
+// Initially, hide the PreRegInstructions and show the BlockPreRegTitle
 document.getElementById("pbid-PreRegInstructions").style.display = "none";
 $BlockPreRegInstructions.$visible = true;
-$BlockNull01.$visible = true;
 
 // Initially, hide the PreRegClosed Literal
 document.getElementById('pbid-PreRegClosed').style.display = 'none';
@@ -77,7 +76,6 @@ function waitForTermVars() {
 
         // Show the student lookup block
         $BlockStuLookup.$visible = true;
-        $BlockNull02.$visible = true;
         document.getElementById("pbid-UserSource").value = 'R';  // Registrars or Dev User
         document.getElementById('pbid-UserButton').click();
       }
@@ -85,11 +83,9 @@ function waitForTermVars() {
 
         // Hide the student lookup block
         $BlockStuLookup.$visible = false;
-        $BlockNull02.$visible = false;
 
         // Show the Preregistration Passcode block
         $StuPreRegPasscodeBlock.$visible = true;
-        $BlockNull03.$visible = true;
 
         // Prep data
         document.getElementById("pbid-UserSource").value = 'S';  // Student User
@@ -107,7 +103,6 @@ function waitForTermVars() {
 
         // Hide the student lookup block
         $BlockStuLookup.$visible = false;
-        $BlockNull02.$visible = false;
 
         alert("You're not authorized to use the Preregistration application.",{type:"error"});
       }
@@ -127,15 +122,10 @@ function waitForTermVars() {
 
       // Hide All Blocks
       $BlockStuLookup.$visible = false;
-      $BlockNull02.$visible = false;
       $StuPreRegPasscodeBlock = false;
-      $BlockNull03.$visible = false;
       $BlockAddClasses.$visible = false;
-      $BlockNull04.$visible = false;
       $BlockStuCourses.$visible = false;
-      $BlockNull05.$visible = false;
       $BlockClassSearch.$visible = false;
-      $BlockNull06.$visible = false;
       $BlockCourseAdd.$visible = false;
     }
 

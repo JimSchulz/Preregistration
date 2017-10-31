@@ -12,16 +12,12 @@ if (stuSelect != null) {
   $AddEntryStuClass.$load({clearCache:true});
   $CoursesTable.$load({clearCache:true});
   $BlockClassSearch.$visible = false;
-  $BlockNull06.$visible = false;
   $BlockCourseAdd.$visible = false;
 }
 else {
   // Hide all Blocks
   $BlockAddClasses.$visible = false;
-  $BlockNull04.$visible = false;
   $BlockStuCourses.$visible = false;
-  $BlockNull05.$visible = false;
   $BlockClassSearch.$visible = false;
-  $BlockNull06.$visible = false;
   $BlockCourseAdd.$visible = false;
 }

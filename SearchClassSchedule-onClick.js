@@ -1,21 +1,13 @@
 // SearchClassSchedule - onClick
 
-// Show/Hide the Class Schedule search section
+// Show the Class Schedule search block and hide the Course Add and Course Drop blocks
 
 if ($BlockClassSearch.$visible == false) {
+  $BlockAddClasses.$visible = false;
+  $BlockStuCourses.$visible = false;
   $BlockClassSearch.$visible = true;
-  $BlockNull06.$visible = true;
-  $BlockCourseAdd.$visible = true;
   $SearchTermSelect.$load({clearCache:true});
   $SearchSubjectSelect.$load({clearCache:true});
-  $SearchBlockSelect.$load({clearCache:true});
-  $SearchInstructorSelect.$load({clearCache:true});
   $SearchDegReqSelect.$load({clearCache:true});
   $SearchCampusSelect.$load({clearCache:true});
-  alert("Class Schedule form displayed below.", {flash: true});
-}
-else {
-  $BlockClassSearch.$visible = false;
-  $BlockNull06.$visible = false;
-  $BlockCourseAdd.$visible = false;
 }

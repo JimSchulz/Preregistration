@@ -38,7 +38,6 @@ function waitForStudentPIN() {
 
     // Hide the Student Preregistration Passcode block
     $StuPreRegPasscodeBlock.$visible = false;
-    $BlockNull03.$visible = false;
 
     // Load the goods
     $AddEntryStuName.$load({clearCache:true});
@@ -47,9 +46,7 @@ function waitForStudentPIN() {
 
     // Show these Blocks
     $BlockAddClasses.$visible = true;
-    $BlockNull04.$visible = true;
     $BlockStuCourses.$visible = true;
-    $BlockNull05.$visible = true;
   });
 }
 

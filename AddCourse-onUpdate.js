@@ -16,12 +16,16 @@ for (i=0; i<rows; i++) {
 
     // Hide the Class Schedule Search and Class Schedule Search Results blocks
     $BlockClassSearch.$visible = false;
-    $BlockNull06.$visible = false;
     $BlockCourseAdd.$visible = false;
+
+    // Show the Course Add and Course Drop blocks
+    $BlockAddClasses.$visible = true;
+    $BlockStuCourses.$visible = true;
 
     // Reset the Class Search Results form
     document.getElementById("pbid-AddCourse-" + i).click();  // Maintain state of checkbox
     document.getElementById("pbid-CourseAddForm").reset();
+    document.getElementById('pbid-ClassSearch').reset();
 
     break;
   }

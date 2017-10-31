@@ -17,20 +17,14 @@ h1 {
   padding: 0.50em 0.50em;
 }
 
-/* Header Styles *********************************************************************************/
-#header-main-section {
-  background: #D09B2C;
+h2 {
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
-.institutionalBranding {
-  background-image: url("https://banxet.coloradocollege.edu/institutionLogo.png");
-  width: 11em;
-}
-#header-main-section-east-part {
-  background-color: transparent;
-}
-#header-main-section-east-part #toolsButton, #header-main-section-east-part #userDiv {
-  border-left: 1px #ffffff solid;
-  background: #D09B2C !important;
+
+h3 {
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 /* Block Styles ***********************************************************************************/
@@ -43,7 +37,6 @@ h1 {
   background-color: #FFFFFF;
   color: #333333;
   padding: 0.1em 0.25em 1em 0.25em;
-  text-align: center;
 }
 .blockSpace {
   background-color: #E2E4E4;
@@ -109,6 +102,218 @@ h1 {
 .flex > * { margin: 0 7px; }    
 .flex.vertical > * { margin: 7px 0; }
 
+/* Block Margins ***************************************************************************/
+#pbid-BlockPreRegTitle,
+#pbid-BlockStuLookup,
+#pbid-StuPreRegPasscodeBlock,
+#pbid-BlockAddClasses,
+#pbid-BlockStuCources,
+#pbid-BlockClassSearch,
+#pbid-BlockCourseAdd {
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+/* Title Block *****************************************************************************/
+#pbid-BlockPreRegTitle {
+  white-space: nowrap;
+  background-color: #FFFFFF;
+}
+#pbid-BlockPreRegTitle-label {
+  display: inline-block;
+  font-size: 170%;
+  font-weight: bold;
+  padding-left: 10px;
+}
+#pbid-PreRegButton-container {
+  display: inline-block;
+  padding-left: 12px;
+}
+#pbid-PreRegButton {
+  vertical-align: bottom;
+}
+#pbid-PreRegInfo-container {
+  display: inline-block;
+}
+#pbid-PreRegInfo {
+  vertical-align: top;
+}
+#pbid-PreRegClosed-container {
+  display: inline-block;
+  padding-left: 10px;
+}
+#pbid-PreRegClosed {
+  vertical-align: top;
+}
+#pbid-BlockPreRegInstructions {
+  padding-left: 20px;
+  padding-right: 20px;
+  white-space: normal;
+}
+
+/* Student Lookup Block ********************************************************************/
+#pbid-BlockStuLookupLabels {
+  white-space: nowrap;
+  background-color: #FFFFFF;
+}
+#pbid-StuLookupLabel-container {
+  display: inline-block;
+}
+#pbid-LookupInstructions-container {
+  display: inline-block;
+  padding-left: 100px;
+}
+#pbid-LookupInstructions {
+  text-align: left;
+}
+#pbid-StuLookupForm {
+  white-space: nowrap;
+  background-color: #FFFFFF;
+}
+#pbid-StuLookup-container {
+  display: inline-block;
+  vertical-align: top;
+  padding-top: 0em !Important;
+}
+#pbid-StuSearch-container {
+  display: inline-block;
+  vertical-align: top;
+  padding-top: 0em !Important;
+}
+#pbid-StuSelect-container {
+  display: inline-block;
+  vertical-align: top;
+  padding-top: 0em !Important;
+}
+
+/* Class Search Grid ***********************************************************************/
+
+#pbid-ClassSearch {                         /* Grid */
+  display: grid;
+  grid-template-columns: 50% 50%;
+}
+#pbid-ClassSearch-label {                   /*  Grid Label */
+  grid-column: 1;
+  grid-row: 1;
+  font-size: 1.3em;
+  font-weight: bold;
+  padding-left: 10px;
+}
+#pbid-SearchTermSelect-container {          /* Column one */
+  white-space: nowrap;
+  grid-column: 1;
+  grid-row: 2;
+}
+#pbid-SearchTermSelect-label {
+  display: inline-block;
+}
+#pbid-SearchTermSelect {
+  display: inline-block;
+}
+#pbid-SearchSubjectSelect-container {       /* Column one */
+  white-space: nowrap;
+  grid-column: 1;
+  grid-row: 3;
+}
+#pbid-SearchSubjectSelect-label {
+  display: inline-block;
+}
+#pbid-SearchSubjectSelect {
+  display: inline-block;
+}
+#pbid-SearchCourseNumber-container {        /* Column one */
+  white-space: nowrap;
+  grid-column: 1;
+  grid-row: 4;
+}
+#pbid-SearchCourseNumber-label {
+  display: inline-block;
+}
+#pbid-SearchCourseNumber {
+  display: inline-block;
+}
+#pbid-SearchCourseID-container {            /* Column one */
+  white-space: nowrap;
+  grid-column: 1;
+  grid-row: 5;
+}
+#pbid-SearchCourseID-label {
+  display: inline-block;
+}
+#pbid-SearchCourseID {
+  display: inline-block;
+}
+#pbid-SearchCourseTitle-container {         /* Column one */
+  white-space: nowrap;
+  grid-column: 1;
+  grid-row: 6;
+}
+#pbid-SearchCourseTitle-label {
+  display: inline-block;
+}
+#pbid-SearchCourseTitle {
+  display: inline-block;
+}
+#pbid-SearchBlockSelect-container {         /* Column two */
+  white-space: nowrap;
+  grid-column: 2;
+  grid-row: 2;
+}
+#pbid-SearchBlockSelect-label {
+  display: inline-block;
+}
+#pbid-SearchBlockSelect {
+  display: inline-block;
+}
+#pbid-SearchInstructorSelect-container {    /* Column two */
+  white-space: nowrap;
+  grid-column: 2;
+  grid-row: 3;
+}
+#pbid-SearchInstructorSelect-label {
+  display: inline-block;
+}
+#pbid-SearchInstructorSelect {
+  display: inline-block;
+}
+#pbid-SearchDegReqSelect-container {        /* Column two */
+  white-space: nowrap;
+  grid-column: 2;
+  grid-row: 4;
+}
+#pbid-SearchDegReqSelect-label {
+  display: inline-block;
+}
+#pbid-SearchDegReqSelect {
+  display: inline-block;
+}
+#pbid-SearchCampusSelect-container {        /* Column two */
+  white-space: nowrap;
+  grid-column: 2;
+  grid-row: 5;
+}
+#pbid-SearchCampusSelect-label {
+  display: inline-block;
+}
+#pbid-SearchCampusSelect {
+  display: inline-block;
+}
+#pbid-BlockClassSearchButtons {         /* Column two */
+  white-space: nowrap;
+  grid-column: 2;
+  grid-row: 6;
+  padding-top: 16px;
+}
+#pbid-ClassSearchSubmit-container {
+  display: inline-block;
+  padding-left: 15px;
+  padding-left: 120px;
+}
+#pbid-ClassSearchReturn-container {
+  display: inline-block;
+  padding-left: 15px;
+}
+
 /* Table Styles ****************************************************************************/
 #pbid-CoursesTable {
   border: none !important;
@@ -127,12 +332,6 @@ td {
   padding: 5px;
   vertical-align: top;
   font-size: 85%;
-}
-
-/* Form Styles ********************************************************************************/
-#pbid-ClassSearch,
-#pbid-StuLookupForm {
-  padding-top: 1em;
 }
 
 /* Input Styles ********************************************************************************/
@@ -167,13 +366,13 @@ input.pb-item.hasDatepicker{
 
 /* Label Styles ***********************************************************************************/
 label.pb-label {
-  size: 1em;
-  color: #4F585F;
-  font-weight: 400;
+  /*size: 1em;*/
+  /*color: #4F585F;*/
+  /*font-weight: 400;*/
 
   /* Float Labels Right but left of Input Text Boxes and Center All */
-  float: center;
-  width: 14em;
+  /*float: center;*/
+  width: 7em;
   margin-right: 0.5em;
   text-align: right;
 }
@@ -182,6 +381,7 @@ label.pb-label.pb-boolean{
 }
 
 /* Section Labels ***********************************************************************************/
+#pbid-StuLookupLabel-container,
 #pbid-StuPreRegPasscodeLabel-container,
 #pbid-CourseAddLabel-container,
 #pbid-CourseDropLabel-container,
@@ -213,8 +413,7 @@ label.pb-label.pb-boolean{
   border: none;
   box-shadow: none;
   width: 22.6em;
-  padding-top: 0.5em !Important;
-  padding: 1em 0.75em;  /* For Firefox */
+  padding: 0em 0em 0.4em 1em !Important;
 }
 #pbid-AddVerifyForm {
   background-color: #eeeeee;

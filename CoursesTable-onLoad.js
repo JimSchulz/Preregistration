@@ -52,16 +52,13 @@ function go() {
 
   // Show the Add Classes Block
   $BlockAddClasses.$visible = true;
-  $BlockNull04.$visible = true;
 
   // Show or Hide the Student Courses Block
   if (j > 0) {
     $BlockStuCourses.$visible = true;
-    $BlockNull05.$visible = true;
   }
   else {
     $BlockStuCourses.$visible = false;
-    $BlockNull05.$visible = false;
     alert("No preregistration records found.",{flash:true});
   }
 
