@@ -13,6 +13,8 @@ if (stuSelect != null) {
   $CoursesTable.$load({clearCache:true});
   $BlockClassSearch.$visible = false;
   $BlockCourseAdd.$visible = false;
+  document.getElementById('pbid-ClassCRN').value = '';
+  document.getElementById('pbid-ClassConsent').value = '';
 }
 else {
   // Hide all Blocks

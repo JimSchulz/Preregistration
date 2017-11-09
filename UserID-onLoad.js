@@ -19,6 +19,7 @@ document.getElementById("pbid-PreRegInstructions").style.display = "none";
 $BlockPreRegInstructions.$visible = true;
 
 // Initially, hide the PreRegClosed Literal
+document.getElementById('pbid-PreRegClosed').value = '';
 document.getElementById('pbid-PreRegClosed').style.display = 'none';
 
 // Get the Preregistration Term variables (GTVSDAX)
@@ -48,7 +49,7 @@ function waitForTermVars() {
     var term = document.getElementById('pbid-PreRegTerm').value.substring(4,6);
     var endDate = new Date(document.getElementById('pbid-PreRegEndDate').value);
 
-    if (document.getElementById('pbid-PreRegTerm').value.length == 6 &&  // PreRegTerm has 6 characters
+    if (document.getElementById('pbid-PreRegTerm').value.length == 6 &&  // PreRegTerm has 6 or 4 characters
         !isNaN(document.getElementById('pbid-PreRegTerm').value)     &&  // PreRegTerm is numeric
         !isNaN(document.getElementById('pbid-MaxPoints').value)      &&  // MaxPoints is numeric
         document.getElementById('pbid-MaxPoints').value.length > 0   &&  // MaxPoints length > 0
@@ -112,12 +113,12 @@ function waitForTermVars() {
 
       // Preregistration is Closed
 
-      // Show the Closed message
+      // Show the Preregistration Closed message
+      document.getElementById('pbid-PreRegClosed').value = 'Preregistration is closed.';
       document.getElementById('pbid-PreRegClosed').style.display = 'block';
 
       // Hide Preregistration Instruction Objects
       document.getElementById("pbid-PreRegButton").style.display = "none";
-      document.getElementById("pbid-PreRegInfo").style.display = "none";
       document.getElementById("pbid-PreRegInstructions").style.display = "none";
 
       // Hide All Blocks

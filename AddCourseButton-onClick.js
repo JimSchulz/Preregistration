@@ -36,12 +36,8 @@ if (crn.length < 5) {
   return;
 }
 
-// CRN not within current term
-if (crn.substring(0,2) != document.getElementById('pbid-PreRegTerm').value.substring(4,6)) {
-  alert("Invalid CRN for preregistration term.",{flash: true,type:"error"});
-  document.getElementById('pbid-ClassCRN').focus();
-  return;
-}
+// Upper case the Class Consent value
+document.getElementById('pbid-ClassConsent').value = document.getElementById('pbid-ClassConsent').value.toUpperCase();
 
 // CRN database edits
 $PreRegTerm = document.getElementById('pbid-PreRegTerm').value;
@@ -117,6 +113,11 @@ function waitForPinsLoads() {
   promise.then(function(result) {
 
     // Promise fulfilled.  Database PIN variables have completed their loads.
+
+    // Debug
+    //alert("AddCourseEdits=" + document.getElementById('pbid-ConsentRequired').value,{flash:true});
+    //alert("DepartmentPIN=" + document.getElementById('pbid-DepartmentPIN').value,{flash:true});
+    //alert("ClassConsent=" + document.getElementById('pbid-ClassConsent').value,{flash:true});
 
     if (document.getElementById('pbid-ConsentRequired').value == 'D') {
     
