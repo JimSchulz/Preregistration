@@ -3,7 +3,7 @@
 var actionAskConfirm = null;
 var actionSave = 1;
 var actionCancel = 2;
-var result = true;  // Do not call default save after onSave
+var result = true;  // Do not call default save after 
 
 if ($CoursesTable.myAction == actionAskConfirm ) {
 

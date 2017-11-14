@@ -4,10 +4,6 @@ var userType = '';
 var auth = '';
 var today = new Date();
 var endDate;
-var term = '';
-var maxPoints = '';
-var termOK = true;
-var maxPointsOK = true;
 
 // Internet Explorer 6-11
 var isIE = /*@cc_on!@*/false || !!document.documentMode;
@@ -45,55 +41,20 @@ function waitForTermVars() {
     // Promise fulfilled.  Database Term variables have completed their load.
     
     // Debug
-    //alert("PreRegType=" + document.getElementById('pbid-PreRegType').value,{flash:true});
-    //alert("PreRegTerm=" + document.getElementById('pbid-PreRegTerm').value,{flash:true});
-    //alert("PreRegEndDate=" + document.getElementById('pbid-PreRegEndDate').value,{flash:true});
+    //alert("Type=" + document.getElementById('pbid-PreRegType').value,{flash:true});
+    //alert("Term=" + document.getElementById('pbid-PreRegTerm').value,{flash:true});
+    //alert("EndDate=" + document.getElementById('pbid-PreRegEndDate').value,{flash:true});
     //alert("MaxPoints=" + document.getElementById('pbid-MaxPoints').value,{flash:true});
 
-    // Load GTVSDAX variables
-    term = document.getElementById('pbid-PreRegTerm').value;
-    maxPoints = document.getElementById('pbid-MaxPoints').value;
+    var term = document.getElementById('pbid-PreRegTerm').value.substring(4,6);
     var endDate = new Date(document.getElementById('pbid-PreRegEndDate').value);
 
-    // Check GTVSDAX Term
-    if (term.length == 4) {
-      if (isNaN(term)) {
-        alert("A",{flash:true});
-        termOK = false;
-      }
-    }
-    else if (term.length == 6) {
-      if (isNaN(term)) {
-        alert("B",{flash:true});
-        termOK = false;
-      }
-      else if (term.substring(4,6) != '10' && term.substring(4,6) != '20' && term.substring(4,6) != '30') {
-        alert("C",{flash:true});
-        termOK = false;
-      }
-    }
-    else {
-      alert("D",{flash:true});
-      termOK = false;
-    }
-
-    // Check GTVSDAX Max Points
-    if (maxPoints.length == 2) {
-      if (isNaN(maxPoints)) {
-        maxPointsOK = false;
-      }
-    }
-    else {
-      maxPointsOK = false;
-    }
-
-    // Debug
-    //alert("term=" + term,{flash:true});
-    //alert("maxPoints=" + maxPoints,{flash:true});
-    //alert("termOK=" + termOK,{flash:true});
-    //alert("maxPointsOK=" + maxPointsOK,{flash:true});
-
-    if (termOK && maxPointsOK && endDate >= today) {
+    if (document.getElementById('pbid-PreRegTerm').value.length == 6 &&  // PreRegTerm has 6 or 4 characters
+        !isNaN(document.getElementById('pbid-PreRegTerm').value)     &&  // PreRegTerm is numeric
+        !isNaN(document.getElementById('pbid-MaxPoints').value)      &&  // MaxPoints is numeric
+        document.getElementById('pbid-MaxPoints').value.length > 0   &&  // MaxPoints length > 0
+        endDate >= today &&                                              // PreRegEndDate > Current Date
+        (term == '10' || term == '20' || term == '30')) {                // The term is 10, 20 or 30
 
       // Preregistration is Open
 
@@ -144,7 +105,7 @@ function waitForTermVars() {
         // Hide the student lookup block
         $BlockStuLookup.$visible = false;
 
-        alert("Sorry, you're not authorized to use the Preregistration application.",{type:"error"});
+        alert("You're not authorized to use the Preregistration application.",{type:"error"});
       }
 
     }

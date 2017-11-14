@@ -67,13 +67,14 @@ function waitForAddCourseEdits() {
     }
 
     // No errors edit
-    if (document.getElementById('pbid-AddCourseEdits').value == '1') {
+    if (document.getElementById('pbid-AddCourseEdits').value.length == 6) {  // Length of valid CRN Term is 6
+      $TermCRN = document.getElementById('pbid-AddCourseEdits').value;
       document.getElementById('pbid-AddCourseEdits').value = '';
     }
-
+    
     // Display any CRN edit messages
-    if (document.getElementById('pbid-AddCourseEdits').value > '') {
-      alert(document.getElementById('pbid-AddCourseEdits').value,{flash: true,type:"error"});
+    if (document.getElementById('pbid-AddCourseEdits').value.length > 0) {
+      alert(document.getElementById('pbid-AddCourseEdits').value,{flash:true});
       document.getElementById('pbid-ClassCRN').focus();
       return;
     }
@@ -157,10 +158,10 @@ function waitForPinsLoads() {
 
     // All edits have passed. Add the preregistration course.
 
-    // Procedure call - Add Check - This checks the course being added
+    // PreRegStuCourses - Inserts into sfrstcr and sfrareg
     $addClass.$post({  // ---------- addClass Post
       stu_pidm: $PassPIDM,
-      term_code: document.getElementById('pbid-PreRegTerm').value,
+      term_code: $TermCRN,
       crn: crn
     },
     null,

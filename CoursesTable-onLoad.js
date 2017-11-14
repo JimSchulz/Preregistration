@@ -50,7 +50,7 @@ function go() {
   // Save the Total Points Index
   document.getElementById('pbid-TotalPointsIndex').value = j;
 
-  // Show the Add Classes Block
+  // Show the Course Add Block
   $BlockAddClasses.$visible = true;
 
   // Show or Hide the Student Courses Block
