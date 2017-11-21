@@ -41,6 +41,16 @@ SELECT    'You are already registered or waitlisted for CRN '
        AND sfrstcr_crn = :crn
        AND sfrstcr_rsts_code IN ('RE', 'WL')
 UNION
+SELECT    'You have previously dropped CRN '
+       || sfrstcr_crn
+       || '. Please see the Registrars Office.'
+          "EDIT_MSG"
+  FROM sfrstcr
+ WHERE     sfrstcr_term_code = :term_code
+       AND sfrstcr_pidm = :stu_pidm
+       AND sfrstcr_crn = :crn
+       AND sfrstcr_rsts_code = 'DD'
+UNION
 SELECT    'You are already preregistered for a course in block '
        || (SELECT stvptrm_desc
              FROM stvptrm
