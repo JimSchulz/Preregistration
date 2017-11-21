@@ -58,22 +58,18 @@ function waitForTermVars() {
     // Check GTVSDAX Term
     if (term.length == 4) {
       if (isNaN(term)) {
-        alert("A",{flash:true});
         termOK = false;
       }
     }
     else if (term.length == 6) {
       if (isNaN(term)) {
-        alert("B",{flash:true});
         termOK = false;
       }
       else if (term.substring(4,6) != '10' && term.substring(4,6) != '20' && term.substring(4,6) != '30') {
-        alert("C",{flash:true});
         termOK = false;
       }
     }
     else {
-      alert("D",{flash:true});
       termOK = false;
     }
 
